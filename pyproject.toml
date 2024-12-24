@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "aws-croniter"
+version = "0.1.0"
+description = "A Python utility for AWS cron expressions. Validate and parse AWS EventBridge cron expressions seamlessly."
+authors = ["Siddarth Patil <siddarth3639@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+packages = [{ include = "aws-croniter", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^6.0.0"
+
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+addopts = "--durations=3 --cov --cov-report=html --cov-report=xml"
+
+[tool.coverage.run]
+source = ["aws-croniter"]
+
+[tool.coverage.report]
+fail_under = 80
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
