@@ -45,6 +45,11 @@ extend-select = [
 [tool.ruff.lint.isort]
 force-single-line = true
 
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*" = [
+    "S101", # asserts allowed in tests
+]
+
 
 [build-system]
 requires = ["poetry-core"]

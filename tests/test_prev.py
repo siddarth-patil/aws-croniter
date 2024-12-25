@@ -30,8 +30,6 @@ def test_generate_multiple_prev_occurrences1():
     results = []
 
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).prev()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert str(dt) == expected

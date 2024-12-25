@@ -28,10 +28,8 @@ def test_generate_multiple_next_occurences1():
     dt = datetime.datetime(2020, 5, 9, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -59,10 +57,8 @@ def test_generate_multiple_next_occurences2():
     dt = datetime.datetime(2020, 5, 9, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -82,10 +78,8 @@ def test_generate_multiple_next_occurences3():
     dt = datetime.datetime(2020, 12, 7, 15, 57, 37, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -105,10 +99,8 @@ def test_generate_multiple_next_occurences4():
     dt = datetime.datetime(2020, 12, 7, 15, 57, 37, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -130,10 +122,8 @@ def test_generate_multiple_next_6():
     dt = datetime.datetime(2020, 12, 7, 15, 57, 37, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -165,10 +155,8 @@ def test_generate_multiple_next_7():
     dt = datetime.datetime(2020, 5, 9, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -193,10 +181,8 @@ def test_generate_multiple_next_8():
     dt = datetime.datetime(2020, 5, 9, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -213,10 +199,8 @@ def test_generate_multiple_next_9():
     dt = datetime.datetime(2020, 7, 31, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -233,10 +217,8 @@ def test_generate_multiple_next_10():
     dt = datetime.datetime(2020, 4, 30, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -253,10 +235,8 @@ def test_generate_multiple_next_11():
     dt = datetime.datetime(2020, 4, 30, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -276,10 +256,8 @@ def test_generate_multiple_next_12():
     dt = datetime.datetime(2020, 12, 30, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -308,10 +286,8 @@ def test_generate_multiple_next_13():
     dt = datetime.datetime(2020, 4, 30, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -338,10 +314,8 @@ def test_generate_multiple_next_occurences13():
     dt = datetime.datetime(2020, 12, 7, 15, 57, 37, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
 
 
@@ -373,8 +347,6 @@ def test_generate_multiple_next_14():
     dt = datetime.datetime(2020, 5, 9, 22, 30, 57, tzinfo=datetime.timezone.utc)
     results = []
     for expected in expected_list:
-        print(f"Input {cron}, occurrence: {dt}")
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
-        print(f"Result: {dt}\tExpected: {expected}\n")
         assert expected == str(dt)
