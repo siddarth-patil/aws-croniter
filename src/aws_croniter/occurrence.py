@@ -9,7 +9,7 @@ from aws_croniter.commons import Commons
 class Occurrence:
     def __init__(self, AWSCron, utc_datetime):
         if utc_datetime.tzinfo is None or utc_datetime.tzinfo != datetime.timezone.utc:
-            raise Exception("Occurance utc_datetime must have tzinfo == datetime.timezone.utc")
+            raise Exception("Occurrence utc_datetime must have tzinfo == datetime.timezone.utc")
         self.utc_datetime = utc_datetime
         self.cron = AWSCron
         self.iter = 0

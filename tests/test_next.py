@@ -3,7 +3,7 @@ import datetime
 from aws_croniter.awscron import AWSCron
 
 
-def test_generate_multiple_next_occurences1():
+def test_generate_multiple_next_occurrences1():
     """At 23, 24, and 25 minutes past the hour, at 05:00 PM and 06:00 PM,
         on day 25 of the month, every 4 months, March through December,
         only in 2020, 2021, 2023, and 2028
@@ -33,7 +33,7 @@ def test_generate_multiple_next_occurences1():
         assert expected == str(dt)
 
 
-def test_generate_multiple_next_occurences2():
+def test_generate_multiple_next_occurrences2():
     """At 10:15 AM, on the last Friday of the month, 2002 through 2025
         cron(Minutes Hours Day-of-month Month Day-of-week Year)
         L ==>> This character is used to specify last day of the month or week
@@ -62,7 +62,7 @@ def test_generate_multiple_next_occurences2():
         assert expected == str(dt)
 
 
-def test_generate_multiple_next_occurences3():
+def test_generate_multiple_next_occurrences3():
     """Every 3 hours
         cron(Minutes Hours Day-of-month Month Day-of-week Year)
     :return:
@@ -83,7 +83,7 @@ def test_generate_multiple_next_occurences3():
         assert expected == str(dt)
 
 
-def test_generate_multiple_next_occurences4():
+def test_generate_multiple_next_occurrences4():
     """At 12:15 PM, only on Sunday and Monday
         cron(Minutes Hours Day-of-month Month Day-of-week Year)
     :return:
@@ -291,7 +291,7 @@ def test_generate_multiple_next_13():
         assert expected == str(dt)
 
 
-def test_generate_multiple_next_occurences13():
+def test_generate_multiple_next_occurrences13():
     """At 12:15 PM, only on Sunday and Monday
         Testing if order in the Month or Day-of-week affects results when using the wild card ","
         cron(Minutes Hours Day-of-month Month Day-of-week Year)
