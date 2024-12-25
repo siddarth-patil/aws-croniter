@@ -127,7 +127,7 @@ class AWSCron:
         schedule_list = list()
         if not isinstance(from_date, datetime.datetime):
             raise ValueError(
-                "Invalid from_date. Must be of type datetime.dateime" " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
             )
         else:
             cron_iterator = AWSCron(cron)
@@ -151,7 +151,7 @@ class AWSCron:
         schedule_list = list()
         if not isinstance(from_date, datetime.datetime):
             raise ValueError(
-                "Invalid from_date. Must be of type datetime.dateime" " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
             )
         else:
             cron_iterator = AWSCron(cron)
@@ -184,7 +184,7 @@ class AWSCron:
 
         elif not isinstance(from_date, datetime.datetime) or (from_date.tzinfo != datetime.timezone.utc):
             raise ValueError(
-                "Invalid from_date and to_date. Must be of type datetime.dateime"
+                "Invalid from_date and to_date. Must be of type datetime.datetime"
                 " and have tzinfo = datetime.timezone.utc"
             )
         else:
