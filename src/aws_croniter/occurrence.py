@@ -136,22 +136,32 @@ class Occurrence:
 
         return datetime.datetime(year, month, day_of_month, hour, minute, tzinfo=datetime.timezone.utc)
 
-    def next(self):
-        """Generate the next after the occurrence date value
+    def next(self, datetime_inclusive=False):
+        """
+        Generate the next occurrence after the current time.
 
-        :return:
+        :param datetime_inclusive: If True, include the current time if it matches a valid execution.
+        :return: The next occurrence as a datetime object.
         """
         self.iter = 0
         from_epoch = (math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) + 1) * 60000
+        if datetime_inclusive:
+            # Do not add extra minute, include current time
+            from_epoch = math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)
         return self.__find_once(self.cron, dt)
 
-    def prev(self):
-        """Generate the prev before the occurrence date value
+    def prev(self, datetime_inclusive=False):
+        """
+        Generate the prev before the occurrence date value
 
-        :return:
+        :param datetime_inclusive: If True, include the current time if it matches a valid execution.
+        :return: The next occurrence as a datetime object.
         """
         self.iter = 0
         from_epoch = (math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) - 1) * 60000
+        if datetime_inclusive:
+            # Do not subtract extra minute, include current time
+            from_epoch = math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)
         return self.__find_prev_once(self.cron, dt)

@@ -19,6 +19,9 @@ pytest-cov = "^5.0"
 
 
 [tool.pytest.ini_options]
+markers = [
+    "package",
+]
 testpaths = "tests"
 addopts = "--durations=3 --cov --cov-report=html --cov-report=xml"
 

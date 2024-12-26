@@ -350,3 +350,12 @@ def test_generate_multiple_next_14():
         dt = cron.occurrence(dt).next()
         results.append(str(dt))
         assert expected == str(dt)
+
+
+def test_generate_next_occurrence_with_datetime_inclusive():
+    cron = "23 17 25 7 ? 2020"
+    expected_occurrence = "2020-07-25 17:23:00+00:00"
+    cron = AWSCron(cron)
+    dt = datetime.datetime(2020, 7, 25, 17, 23, 57, tzinfo=datetime.timezone.utc)
+    dt = cron.occurrence(dt).next(datetime_inclusive=True)
+    assert expected_occurrence == str(dt)
