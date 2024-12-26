@@ -12,12 +12,6 @@ class DateUtils:
         return mapping[python_day_of_week]
 
     @staticmethod
-    def aws_to_python_day_of_week(aws_day_of_week):
-        """Convert AWS day of week (Mon=2) to Python day of week (Mon=0)."""
-        mapping = {2: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 1: 6}
-        return mapping[aws_day_of_week]
-
-    @staticmethod
     def get_days_of_month_from_days_of_week(year, month, days_of_week):
         """Get all days of the month that match the given days of the week."""
         days_of_month = []
