@@ -202,11 +202,9 @@ def test_generate_multiple_prev_occurrences1():
 
     cron = AWSCron(cron)
     dt = datetime.datetime(2020, 5, 9, 22, 30, 57, tzinfo=datetime.timezone.utc)
-    results = []
 
     for expected in expected_list:
         dt = cron.occurrence(dt).prev()
-        results.append(str(dt))
         assert str(dt) == expected
 
 

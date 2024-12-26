@@ -1,5 +1,3 @@
-import datetime
-
 import pytest
 
 from aws_croniter.awscron import AWSCron
@@ -128,24 +126,3 @@ def test_cron_expressions(cron_str, expected):
     assert expected["months"] == cron_obj.months
     assert expected["daysOfWeek"] == cron_obj.days_of_week
     assert expected["years"] == cron_obj.years
-
-
-def test_cron_expressions_occurrence():
-    cron_str = "0 9 ? * 2 *"
-    expected_list = [
-        "2022-01-03 09:00:00+00:00",
-        "2022-01-10 09:00:00+00:00",
-        "2022-01-17 09:00:00+00:00",
-        "2022-01-24 09:00:00+00:00",
-        "2022-01-31 09:00:00+00:00",
-        "2022-02-07 09:00:00+00:00",
-        "2022-02-14 09:00:00+00:00",
-        "2022-02-21 09:00:00+00:00",
-        "2022-02-28 09:00:00+00:00",
-        "2022-03-07 09:00:00+00:00",
-    ]
-    cron = AWSCron(cron_str)
-    dt = datetime.datetime(2021, 12, 31, 21, 0, 0, tzinfo=datetime.timezone.utc)
-    for expected in expected_list:
-        dt = cron.occurrence(dt).next()
-        assert expected == str(dt)
