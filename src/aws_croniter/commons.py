@@ -94,7 +94,7 @@ class Commons:
         this_date = datetime.datetime(year, month, 1, tzinfo=datetime.timezone.utc) + relativedelta(days=day - 1)
         if not (this_date.month == month and this_date.year == year):
             return False
-        # pyhthon: Mon:0 Friday:4
+        # python: Mon:0 Friday:4
         return this_date.weekday() >= 0 and this_date.weekday() <= 4
 
     @staticmethod
