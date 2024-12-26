@@ -130,39 +130,60 @@ def test_cron_expressions(cron_str, expected):
     assert expected["years"] == cron_obj.years
 
 
-def test_get_all_schedule_bw_dates():
-    """Testing - retrieve all datetimes between a start and end date when AWS cron expression is set to
-    run every 23 minutes. cron(Minutes Hours Day-of-month Month Day-of-week Year)
-    Where start datetime is 8/7/2021 8:30:57 UTC
-    Where end datetime is 8/7/2021 11:30:57 UTC
+@pytest.mark.parametrize(
+    "from_dt, to_date, cron_expression, exclude_ends, expected_list",
+    [
+        (
+            datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2021, 8, 7, 11, 30, 57, tzinfo=datetime.timezone.utc),
+            "0/23 * * * ? *",
+            False,
+            [
+                datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 23, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2022, 8, 7, 11, 30, 57, tzinfo=datetime.timezone.utc),
+            "1 2 3 4 5 2022",
+            False,
+            [datetime.datetime(2022, 4, 3, 2, 1, tzinfo=datetime.timezone.utc)],
+        ),
+        (
+            datetime.datetime(2021, 8, 7, 8, 46, 57, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2021, 8, 7, 11, 23, 57, tzinfo=datetime.timezone.utc),
+            "0/23 * * * ? *",
+            True,
+            [
+                datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+    ],
+    ids=[
+        "test_regular_schedule_23_minutes",
+        "test_specific_datetime_schedule",
+        "test_exclude_bounds_schedule",
+    ],
+)
+def test_get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_ends, expected_list):
     """
-    expected_list = [
-        datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 11, 23, tzinfo=datetime.timezone.utc),
-    ]
-    from_dt = datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc)
-    to_date = datetime.datetime(2021, 8, 7, 11, 30, 57, tzinfo=datetime.timezone.utc)
-    result = AWSCron.get_all_schedule_bw_dates(from_dt, to_date, "0/23 * * * ? *")
-    assert str(expected_list) == str(result)
-
-
-def test_get_all_schedule_bw_dates_accept_datetime():
-    """Testing - retrieve all datetimes between a start and end date when AWS cron expression is set to
-    run on every 2:01, 3rd day, April, 2022 (specific datetime).
-    Where start datetime is 8/7/2021 8:30:57 UTC
-    Where end datetime is 8/7/2021 11:30:57 UTC
+    Parameterized test for retrieving all schedule times between dates.
     """
-    expected_list = [datetime.datetime(2022, 4, 3, 2, 1, tzinfo=datetime.timezone.utc)]
-    from_dt = datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc)
-    to_date = datetime.datetime(2022, 8, 7, 11, 30, 57, tzinfo=datetime.timezone.utc)
-    result = AWSCron.get_all_schedule_bw_dates(from_dt, to_date, "1 2 3 4 5 2022")
+    result = AWSCron.get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_ends)
     assert str(expected_list) == str(result)
 
 
