@@ -3,7 +3,9 @@ import math
 
 from dateutil.relativedelta import relativedelta
 
-from aws_croniter.commons import Commons
+from aws_croniter.utils import DateUtils
+from aws_croniter.utils import SequenceUtils
+from aws_croniter.utils import TimeUtils
 
 
 class Occurrence:
@@ -24,11 +26,13 @@ class Occurrence:
         current_hour = datetime_from.hour
         current_minute = datetime_from.minute
 
-        year = Commons.array_find_first(parsed.years, lambda c: c >= current_year)
+        year = SequenceUtils.array_find_first(parsed.years, lambda c: c >= current_year)
         if year is None:
             return None
 
-        month = Commons.array_find_first(parsed.months, lambda c: c >= (current_month if year == current_year else 1))
+        month = SequenceUtils.array_find_first(
+            parsed.months, lambda c: c >= (current_month if year == current_year else 1)
+        )
         if not month:
             return self.__find_once(parsed, datetime.datetime(year + 1, 1, 1, tzinfo=datetime.timezone.utc))
 
@@ -37,19 +41,19 @@ class Occurrence:
         is_w_in_current_month = None
 
         if len(p_days_of_month) == 0:
-            p_days_of_month = Commons.get_days_of_month_from_days_of_week(year, month, parsed.days_of_week)
+            p_days_of_month = DateUtils.get_days_of_month_from_days_of_week(year, month, parsed.days_of_week)
         elif p_days_of_month[0] == "L":
-            p_days_of_month = Commons.get_days_of_month_for_L(year, month, int(p_days_of_month[1]))
+            p_days_of_month = DateUtils.get_days_of_month_for_L(year, month, int(p_days_of_month[1]))
         elif p_days_of_month[0] == "W":
-            if Commons.is_day_in_month(year, month, int(p_days_of_month[1])):
-                p_days_of_month = Commons.get_days_of_month_for_W(year, month, int(p_days_of_month[1]))
+            if DateUtils.is_day_in_month(year, month, int(p_days_of_month[1])):
+                p_days_of_month = DateUtils.get_days_of_month_for_W(year, month, int(p_days_of_month[1]))
                 is_w_in_current_month = True
             else:
                 is_w_in_current_month = False
         if is_w_in_current_month is not None and not is_w_in_current_month:
             day_of_month = False
         else:
-            day_of_month = Commons.array_find_first(
+            day_of_month = SequenceUtils.array_find_first(
                 p_days_of_month, lambda c: c >= (current_day_of_month if is_same_month else 1)
             )
         if not day_of_month:
@@ -58,12 +62,12 @@ class Occurrence:
 
         is_same_date = is_same_month and day_of_month == current_day_of_month
 
-        hour = Commons.array_find_first(parsed.hours, lambda c: c >= (current_hour if is_same_date else 0))
+        hour = SequenceUtils.array_find_first(parsed.hours, lambda c: c >= (current_hour if is_same_date else 0))
         if hour is None:
             dt = datetime.datetime(year, month, day_of_month, tzinfo=datetime.timezone.utc) + relativedelta(days=+1)
             return self.__find_once(parsed, dt)
 
-        minute = Commons.array_find_first(
+        minute = SequenceUtils.array_find_first(
             parsed.minutes, lambda c: c >= (current_minute if is_same_date and hour == current_hour else 0)
         )
         if minute is None:
@@ -84,11 +88,13 @@ class Occurrence:
         current_hour = datetime_from.hour
         current_minute = datetime_from.minute
 
-        year = Commons.array_find_last(parsed.years, lambda c: c <= current_year)
+        year = SequenceUtils.array_find_last(parsed.years, lambda c: c <= current_year)
         if year is None:
             return None
 
-        month = Commons.array_find_last(parsed.months, lambda c: c <= (current_month if year == current_year else 12))
+        month = SequenceUtils.array_find_last(
+            parsed.months, lambda c: c <= (current_month if year == current_year else 12)
+        )
         if not month:
             dt = datetime.datetime(year, 1, 1, tzinfo=datetime.timezone.utc) + relativedelta(seconds=-1)
             return self.__find_prev_once(parsed, dt)
@@ -98,19 +104,19 @@ class Occurrence:
         is_w_in_current_month = None
 
         if len(p_days_of_month) == 0:
-            p_days_of_month = Commons.get_days_of_month_from_days_of_week(year, month, parsed.days_of_week)
+            p_days_of_month = DateUtils.get_days_of_month_from_days_of_week(year, month, parsed.days_of_week)
         elif p_days_of_month[0] == "L":
-            p_days_of_month = Commons.get_days_of_month_for_L(year, month, int(p_days_of_month[1]))
+            p_days_of_month = DateUtils.get_days_of_month_for_L(year, month, int(p_days_of_month[1]))
         elif p_days_of_month[0] == "W":
-            if Commons.is_day_in_month(year, month, int(p_days_of_month[1])):
-                p_days_of_month = Commons.get_days_of_month_for_W(year, month, int(p_days_of_month[1]))
+            if DateUtils.is_day_in_month(year, month, int(p_days_of_month[1])):
+                p_days_of_month = DateUtils.get_days_of_month_for_W(year, month, int(p_days_of_month[1]))
                 is_w_in_current_month = True
             else:
                 is_w_in_current_month = False
         if is_w_in_current_month is not None and not is_w_in_current_month:
             day_of_month = False
         else:
-            day_of_month = Commons.array_find_last(
+            day_of_month = SequenceUtils.array_find_last(
                 p_days_of_month, lambda c: c <= (current_day_of_month if is_same_month else 31)
             )
 
@@ -120,12 +126,12 @@ class Occurrence:
 
         is_same_date = is_same_month and day_of_month == current_day_of_month
 
-        hour = Commons.array_find_last(parsed.hours, lambda c: c <= (current_hour if is_same_date else 23))
+        hour = SequenceUtils.array_find_last(parsed.hours, lambda c: c <= (current_hour if is_same_date else 23))
         if hour is None:
             dt = datetime.datetime(year, month, day_of_month, tzinfo=datetime.timezone.utc) + relativedelta(seconds=-1)
             return self.__find_prev_once(parsed, dt)
 
-        minute = Commons.array_find_last(
+        minute = SequenceUtils.array_find_last(
             parsed.minutes, lambda c: c <= (current_minute if is_same_date and hour == current_hour else 59)
         )
         if minute is None:
@@ -144,10 +150,10 @@ class Occurrence:
         :return: The next occurrence as a datetime object.
         """
         self.iter = 0
-        from_epoch = (math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) + 1) * 60000
+        from_epoch = (math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) + 1) * 60000
         if datetime_inclusive:
             # Do not add extra minute, include current time
-            from_epoch = math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
+            from_epoch = math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)
         return self.__find_once(self.cron, dt)
 
@@ -159,9 +165,9 @@ class Occurrence:
         :return: The next occurrence as a datetime object.
         """
         self.iter = 0
-        from_epoch = (math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) - 1) * 60000
+        from_epoch = (math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) - 1) * 60000
         if datetime_inclusive:
             # Do not subtract extra minute, include current time
-            from_epoch = math.floor(Commons.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
+            from_epoch = math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)
         return self.__find_prev_once(self.cron, dt)
