@@ -6,6 +6,32 @@ from aws_croniter.utils import DateUtils
 from aws_croniter.utils import SequenceUtils
 from aws_croniter.utils import TimeUtils
 
+@pytest.mark.parametrize(
+    "year, month, day, expected",
+    [
+        (2024, 2, 29, [29]),  # Leap year, valid weekday (Fri)
+        (2023, 2, 28, [28]),  # Non-leap year, last valid day (Tue)
+        (2023, 6, 3, [2]),  # Weekend (Sat), adjusts to nearest weekday (Fri)
+        (2023, 6, 17, [16]),  # Weekend (Sat), adjusts backward (Fri)
+        (2023, 4, 5, [5]),  # Valid weekday (Wed), no adjustment needed
+        (2023, 12, 25, [25]),  # Valid weekday (Mon), no adjustment
+        (2023, 12, 26, [26]),  # Valid weekday (Tue), no adjustment
+        (2024, 2, 35, [])
+    ],
+    ids=[
+        "Leap_Year_Valid",
+        "Non_Leap_Year_Valid_Last_Day",
+        "Weekend_Adjust_Backward",
+        "Weekend_Adjust_Backward_Again",
+        "Valid_Weekday",
+        "Valid_Weekday_Christmas",
+        "Valid_Weekday_Adjacent",
+        "Invalid_Day_Beyond_Last"
+    ],
+)
+def test_get_days_of_month_for_W(year, month, day, expected):
+    """Test DateUtils.get_days_of_month_for_W with various inputs."""
+    assert DateUtils.get_days_of_month_for_W(year, month, day) == expected
 
 @pytest.mark.parametrize(
     "year, month, day, expected",
@@ -70,6 +96,31 @@ def test_is_weekday(year, month, day, expected):
 def test_datetime_to_millisec(dt_obj, expected):
     """Test TimeUtils.datetime_to_millisec with various inputs."""
     assert TimeUtils.datetime_to_millisec(dt_obj) == expected
+
+@pytest.mark.parametrize(
+    "year, month, test_day, expected",
+    [
+        (2024, 2, 29, True),  # Leap year, valid date
+        (2023, 2, 29, False),  # Non-leap year, invalid date
+        (2023, 4, 30, True),  # Valid end-of-month date (April)
+        (2023, 4, 31, False),  # Invalid end-of-month date (April)
+        (2023, 12, 0, False),  # Invalid day (zero)
+        (2023, 12, 32, False),  # Invalid day (over max day)
+        (2023, 6, -1, False),  # Invalid negative day
+    ],
+    ids=[
+        "Leap_Year_Valid",
+        "Non_Leap_Year_Invalid",
+        "Valid_End_Of_Month",
+        "Invalid_End_Of_Month",
+        "Invalid_Day_Zero",
+        "Invalid_Day_Over_Max",
+        "Invalid_Negative_Day",
+    ]
+)
+def test_is_day_in_month(year, month, test_day, expected):
+    """Test DateUtils.is_day_in_month with various inputs."""
+    assert DateUtils.is_day_in_month(year, month, test_day) == expected
 
 
 @pytest.mark.parametrize(

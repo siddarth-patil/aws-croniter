@@ -52,11 +52,9 @@ class DateUtils:
         Adjusts for weekends and ensures the date is within the month.
         """
         offset = SequenceUtils.array_find_first([0, 1, -1, 2, -2], lambda c: DateUtils.is_weekday(year, month, day + c))
-        result = day + offset
-
-        last_day_of_month = calendar.monthrange(year, month)[1]
-        if result > last_day_of_month:
+        if offset is None:
             return []
+        result = day + offset
         return [result]
 
     @staticmethod
