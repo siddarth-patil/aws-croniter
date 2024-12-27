@@ -19,8 +19,6 @@ class DateUtils:
         no_of_days_in_month = calendar.monthrange(year, month)[1]
         for i in range(1, no_of_days_in_month + 1, 1):
             this_date = datetime.datetime(year, month, i, tzinfo=datetime.timezone.utc)
-            if this_date.month != month:  # Skip if already out of month
-                break
             if days_of_week[0] == "L":
                 if days_of_week[1] == DateUtils.python_to_aws_day_of_week(this_date.weekday()):
                     same_day_next_week = datetime.datetime.fromtimestamp(

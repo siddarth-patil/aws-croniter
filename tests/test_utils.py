@@ -6,6 +6,37 @@ from aws_croniter.utils import DateUtils
 from aws_croniter.utils import SequenceUtils
 from aws_croniter.utils import TimeUtils
 
+
+
+@pytest.mark.parametrize(
+    "year, month, days_of_week, expected",
+    [
+        (2023, 9, [2], [4, 11, 18, 25]),  # Mondays in September 2023
+        (2023, 9, [7], [2, 9, 16, 23, 30]),  # Saturdays in September 2023
+        (2024, 2, ["L", 2], [26]),  # Last Monday of February 2024 (Leap Year)
+        (2023, 11, ["#", 4, 2], [8]),  # 2nd Wednesday of November 2023
+        (2023, 11, ["#", 6, 3], [17]),  # 3rd Friday of November 2023
+        (2023, 12, [2, 3], [4, 5, 11, 12, 18, 19, 25, 26]),  # Mondays and Tuesdays in December 2023
+        (2023, 2, [1], [5, 12, 19, 26]),  # Sundays in February 2023 (Non-Leap Year)
+        (2023, 4, ["L", 7], [29]),  # Last Saturday of April 2023
+        (2023, 6, ["#", 3, 1], [6]),  # 1st Tuesday of June 2023
+    ],
+    ids=[
+        "Mondays_September_2023",
+        "Saturdays_September_2023",
+        "Last_Monday_February_2024",
+        "Second_Wednesday_November_2023",
+        "Third_Friday_November_2023",
+        "Mondays_Tuesdays_December_2023",
+        "Sundays_February_2023",
+        "Last_Saturday_April_2023",
+        "First_Tuesday_June_2023",
+    ],
+)
+def test_get_days_of_month_from_days_of_week(year, month, days_of_week, expected):
+    """Test DateUtils.get_days_of_month_from_days_of_week with various inputs."""
+    assert DateUtils.get_days_of_month_from_days_of_week(year, month, days_of_week) == expected
+
 @pytest.mark.parametrize(
     "year, month, day, expected",
     [
