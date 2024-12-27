@@ -171,7 +171,7 @@ class AWSCron:
         :param from_date: datetime object from where the schedule will start with tzinfo in utc.
         :param to_date: datetime object to where the schedule will end with tzinfo in utc.
         :param cron: str of aws cron to be parsed
-        :param exclude_ends: bool defaulted to false to not exclude the end date
+        :param exclude_ends: bool defaulted to False, to not exclude the end date
         :return: list of datetime objects
         """
 
