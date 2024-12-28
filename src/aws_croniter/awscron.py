@@ -1,6 +1,15 @@
 import datetime
+import re
 
+from aws_croniter.exceptions import AWSCronExpressionDayOfMonthError
+from aws_croniter.exceptions import AWSCronExpressionDayOfWeekError
+from aws_croniter.exceptions import AWSCronExpressionError
+from aws_croniter.exceptions import AWSCronExpressionHourError
+from aws_croniter.exceptions import AWSCronExpressionMinuteError
+from aws_croniter.exceptions import AWSCronExpressionMonthError
+from aws_croniter.exceptions import AWSCronExpressionYearError
 from aws_croniter.occurrence import Occurrence
+from aws_croniter.utils import RegexUtils
 
 
 class AWSCron:
@@ -38,6 +47,51 @@ class AWSCron:
         self.days_of_week = None
         self.years = None
         self.rules = cron.split(" ")
+        self.__validate()
+
+    def __validate(self):
+        """
+        Validates these AWS EventBridge cron expressions, which are similar to, but not compatible with standard
+        unix cron expressions:
+        https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html#eb-cron-expressions
+
+        | Field        | Values          | Wildcards     |
+        | :----------: | :-------------: | :-----------: |
+        | Minute       | 0-59            | , - * /       |
+        | Hour         | 0-23            | , - * /       |
+        | Day-of-month | 1-31            | , - * ? / L W |
+        | Month        | 1-12 or JAN-DEC | , - * /       |
+        | Day-of-week  | 1-7 or SUN-SAT  | , - * ? L #   |
+        | Year         | 1970-2199       | , - * /       |
+        """
+        value_count = len(self.cron.split(" "))
+        if value_count != 6:
+            raise AWSCronExpressionError(
+                f"Incorrect number of values in '{self.cron}'. 6 required, {value_count} provided."
+            )
+
+        minute, hour, day_of_month, month, day_of_week, year = self.cron.split(" ")
+
+        if not ((day_of_month == "?" and day_of_week != "?") or (day_of_month != "?" and day_of_week == "?")):
+            raise AWSCronExpressionError(
+                f"Invalid combination of day-of-month '{day_of_month}' and day-of-week '{day_of_week}'."
+                "One must be a question mark (?)"
+            )
+
+        if not re.fullmatch(RegexUtils.minute_regex(), minute):
+            raise AWSCronExpressionMinuteError(f"Invalid minute value '{minute}'.")
+        if not re.fullmatch(RegexUtils.hour_regex(), hour):
+            raise AWSCronExpressionHourError(f"Invalid hour value '{hour}'.")
+        if not re.fullmatch(RegexUtils.day_of_month_regex(), day_of_month):
+            raise AWSCronExpressionDayOfMonthError(f"Invalid day-of-month value '{day_of_month}'.")
+        if not re.fullmatch(RegexUtils.month_regex(), month):
+            raise AWSCronExpressionMonthError(f"Invalid month value '{month}'.")
+        if not re.fullmatch(RegexUtils.day_of_week_regex(), day_of_week):
+            raise AWSCronExpressionDayOfWeekError(f"Invalid day-of-week value '{day_of_week}'.")
+        if not re.fullmatch(RegexUtils.year_regex(), year):
+            raise AWSCronExpressionYearError(f"Invalid year value '{year}'.")
+
+        # If validation passes, then parse the cron expression
         self.__parse()
 
     def occurrence(self, utc_datetime):
@@ -62,7 +116,8 @@ class AWSCron:
         self.days_of_week = self.__parse_one_rule(self.__replace(self.rules[4], AWSCron.DAY_WEEK_REPLACES), 1, 7)
         self.years = self.__parse_one_rule(self.rules[5], 1970, 2199)
 
-    def __parse_one_rule(self, rule, min, max):
+    @staticmethod
+    def __parse_one_rule(rule, min_value, max_value):
         if rule == "?":
             return []
         if rule == "L":
@@ -78,21 +133,21 @@ class AWSCron:
 
         new_rule = None
         if rule == "*":
-            new_rule = str(min) + "-" + str(max)
+            new_rule = str(min_value) + "-" + str(max_value)
         elif "/" in rule:
             parts = rule.split("/")
             start = None
             end = None
             if parts[0] == "*":
-                start = min
-                end = max
+                start = min_value
+                end = max_value
             elif "-" in parts[0]:
                 splits = parts[0].split("-")
                 start = int(splits[0])
                 end = int(splits[1])
             else:
                 start = int(parts[0])
-                end = max
+                end = max_value
             increment = int(parts[1])
             new_rule = ""
             while start <= end:
