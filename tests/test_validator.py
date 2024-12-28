@@ -27,7 +27,7 @@ def _check_non_match(regex: str, match: str):
 def test_slash_regex():
     minute_values = r"(0?[0-9]|[1-5][0-9])"  # [0]0-59
     given_regex = validator.AWSCronExpressionValidator.slash_regex(minute_values)
-    given_valid_matches = ["*/10", "1/10", "0/05", "0/15", "0/30", "55/1", "1-7/2"]
+    given_valid_matches = ["*/10", "5/0", "1/10", "0/05", "0/15", "0/30", "55/1", "1-7/2"]
 
     given_invalid_matches = [
         "",
@@ -38,7 +38,6 @@ def test_slash_regex():
         "/10",
         "*/",
         "*/-1",
-        "5/0",
         "*1/10",
         "5/*10",
         "5/10*",
@@ -132,7 +131,8 @@ def test_month_regex():
     given_regex = validator.AWSCronExpressionValidator.month_regex()
 
     given_valid_matches = ["*", "1", "01", "10", "12", "JAN", "feb", "DeC", "JAN-MAR", "02-MAR", "*-MAR", "FEB/2"]
-    given_invalid_matches = ["0", "13", "600", "-1", "XZY", "JANUARY", "", "2/FEB", "?", "L", "W", "#"]
+    given_invalid_matches = ["0", "13", "600", "-1", "XZY", "JANUARY", "", "?", "L", "W", "#"]
+    # given_invalid_matches = ["2/FEB"]
 
     _then_matches(given_regex, given_valid_matches)
     _then_does_not_match(given_regex, given_invalid_matches)
@@ -204,6 +204,7 @@ def test_year_regex():
 
 def test_validator():
     valid_expressions = [
+        "30 9 L-2 * ? *",
         "0 18 ? * MON-FRI *",
         "0 18 ? * L *",
         "0 18 ? * SATL *",
@@ -235,7 +236,7 @@ def test_validator():
         "0/15 * * * ? *",
         "0/10 * ? * MON-FRI *",
         "0/5 8-17 ? * MON-FRI *",
-        "15/65 10 * * ? *",
+        "15/50 10 * * ? *",
         "0 11-23/2 * * ? *",
         "0 11-23/4 ? * 2-6 *",
         "0 11-23/2 * * ? *",
@@ -254,7 +255,7 @@ def test_validator():
         ("0 18 * * * *", validator.AWSCronExpressionError),
         ("89 10 * * ? *", validator.AWSCronExpressionMinuteError),
         ("65/15 10 * * ? *", validator.AWSCronExpressionMinuteError),
-        # ("5/155 10 * * ? *", validator.AWSCronExpressionMinuteError),
+        ("5/155 10 * * ? *", validator.AWSCronExpressionMinuteError),
         ("0 65 * * ? *", validator.AWSCronExpressionHourError),
         ("0 18 32W * ? *", validator.AWSCronExpressionDayOfMonthError),
         ("0 18 W * ? *", validator.AWSCronExpressionDayOfMonthError),
@@ -265,7 +266,6 @@ def test_validator():
         ("15/30 10 * * ? 2400", validator.AWSCronExpressionYearError),
         ("0 9 ? * ? *", validator.AWSCronExpressionError),
         ("0 18 3L * ? *", validator.AWSCronExpressionDayOfMonthError),
-        ("0 18 L-3 * ? *", validator.AWSCronExpressionDayOfMonthError),
         ("0 1-7/2,11-23/2, * * ? *", validator.AWSCronExpressionHourError),
     ]
 

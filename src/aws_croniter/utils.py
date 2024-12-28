@@ -4,6 +4,71 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 
+class RegexUtils:
+    MINUTE_VALUES = r"(0?[0-9]|[1-5][0-9])"  # [0]0-59
+    HOUR_VALUES = r"(0?[0-9]|1[0-9]|2[0-3])"  # [0]0-23
+    MONTH_OF_DAY_VALUES = r"(0?[1-9]|[1-2][0-9]|3[0-1])"  # [0]1-31
+    MONTH_VALUES = r"(?i:0?[1-9]|1[0-2]|JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)"  # [0]1-12 or JAN-DEC
+    DAY_OF_WEEK_VALUES = r"(?i:[1-7]|SUN|MON|TUE|WED|THU|FRI|SAT)"  # 1-7 or SAT-SUN
+    DAY_OF_WEEK_HASH = rf"({DAY_OF_WEEK_VALUES}#[1-5])"  # Day of the week in the Nth week of the month
+    YEAR_VALUES = r"((19[7-9][0-9])|(2[0-1][0-9][0-9]))"  # 1970-2199
+
+    @classmethod
+    def range_regex(cls, values: str) -> str:
+        return rf"({values}|(\*\-{values})|({values}\-{values})|({values}\-\*))"  # v , *-v , v-v or v-*
+
+    @classmethod
+    def list_range_regex(cls, values: str) -> str:
+        range_ = cls.range_regex(values)
+        return rf"({range_}(\,{range_})*)"  # One or more ranges separated by a comma
+
+    @classmethod
+    def slash_regex(cls, values: str) -> str:
+        range_ = cls.range_regex(values)
+        return rf"((\*|{range_}|{values})\/{values})"
+        # Slash can be preceded by *, range, or a valid value and must be followed by a natural
+        # number as the increment.
+
+    @classmethod
+    def list_slash_regex(cls, values: str) -> str:
+        slash = cls.slash_regex(values)
+        slash_or_range = rf"({slash}|{cls.range_regex(values)})"
+        return rf"({slash_or_range}(\,{slash_or_range})*)"  # One or more separated by a comma
+
+    @classmethod
+    def common_regex(cls, values: str) -> str:
+        return rf"({cls.list_range_regex(values)}|\*|{cls.list_slash_regex(values)})"  # values , - * /
+
+    @classmethod
+    def minute_regex(cls) -> str:
+        return rf"^({cls.common_regex(cls.MINUTE_VALUES)})$"  # values , - * /
+
+    @classmethod
+    def hour_regex(cls) -> str:
+        return rf"^({cls.common_regex(cls.HOUR_VALUES)})$"  # values , - * /
+
+    @classmethod
+    def day_of_month_regex(cls) -> str:
+        return (
+            rf"^({cls.common_regex(cls.MONTH_OF_DAY_VALUES)}|\?|L|L-[1-9]|[1-2][0-9]|3[0-1]|LW|{cls.MONTH_OF_DAY_VALUES}W)$"
+            # values , - * / ? L W
+        )
+
+    @classmethod
+    def month_regex(cls):
+        return rf"^({cls.common_regex(cls.MONTH_VALUES)})$"  # values , - * /
+
+    @classmethod
+    def day_of_week_regex(cls):
+        range_list = cls.list_range_regex(cls.DAY_OF_WEEK_VALUES)
+        return rf"^({range_list}|\*|\?|{cls.DAY_OF_WEEK_VALUES}L|L|L-[1-7]|{cls.DAY_OF_WEEK_HASH})$"
+        # values , - * ? L #
+
+    @classmethod
+    def year_regex(cls):
+        return rf"^({cls.common_regex(cls.YEAR_VALUES)})$"  # values , - * /
+
+
 class DateUtils:
     @staticmethod
     def python_to_aws_day_of_week(python_day_of_week):

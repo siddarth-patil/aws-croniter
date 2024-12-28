@@ -121,6 +121,7 @@ from aws_croniter.awscron import AWSCron
     ],
 )
 def test_cron_expressions(cron_str, expected):
+    # Validation followed by Parsing of cron expression
     cron_obj = AWSCron(cron_str)
     assert expected["minutes"] == cron_obj.minutes
     assert expected["hours"] == cron_obj.hours
@@ -153,7 +154,7 @@ def test_cron_expressions(cron_str, expected):
         (
             datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc),
             datetime.datetime(2022, 8, 7, 11, 30, 57, tzinfo=datetime.timezone.utc),
-            "1 2 3 4 5 2022",
+            "1 2 3 4 ? 2022",
             False,
             [datetime.datetime(2022, 4, 3, 2, 1, tzinfo=datetime.timezone.utc)],
         ),
