@@ -9,8 +9,8 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
 
 env:
-  PACKAGE_NAME: "<PACKAGE_NAME>"
-  OWNER: "<OWNER>"
+  PACKAGE_NAME: "aws-croniter"
+  OWNER: "siddarth-patil"
   TAP_NAME: "<TAP_NAME>"
 
 jobs:
@@ -105,7 +105,7 @@ jobs:
     needs: [ setup_and_build, details ]
     runs-on: ubuntu-latest
     environment:
-      name: release
+      name: pypi
     permissions:
       id-token: write
     steps:
