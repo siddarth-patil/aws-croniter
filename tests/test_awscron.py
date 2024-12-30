@@ -301,48 +301,47 @@ def test_get_next():
     assert str(expected_list) == str(result)
 
 
-def test_get_prev_1():
-    """Testing - retrieve n number of datetimes before start date when AWS cron expression is set to
-    run every 23 minutes. cron(Minutes Hours Day-of-month Month Day-of-week Year)
-    Where start datetime is 8/7/2021 11:50:57 UTC
-    """
-    expected_list = [
-        datetime.datetime(2021, 8, 7, 11, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 11, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
-    ]
-    from_dt = datetime.datetime(2021, 8, 7, 11, 50, 57, tzinfo=datetime.timezone.utc)
-    itr = AwsCroniter("0/23 * * * ? *")
-    result = itr.get_prev(from_dt, 10)
-    assert str(expected_list) == str(result)
-
-
-def test_get_prev_2():
-    """Testing - retrieve n number of datetimes before start date when AWS cron expression is set to
-    run every 5 minutes Monday through Friday between 8:00 am and 5:55 pm (UTC).
-    cron(Minutes Hours Day-of-month Month Day-of-week Year)
-    Where start datetime is 8/16/2021 8:50:57 UTC
-    """
-    expected_list = [
-        datetime.datetime(2021, 8, 16, 8, 45, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 40, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 35, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 30, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 25, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 20, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 15, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 10, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 5, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 16, 8, 0, tzinfo=datetime.timezone.utc),
-    ]
-    from_dt = datetime.datetime(2021, 8, 16, 8, 50, 57, tzinfo=datetime.timezone.utc)
-    itr = AwsCroniter("0/5 8-17 ? * MON-FRI *")
-    result = itr.get_prev(from_dt, 10)
+@pytest.mark.parametrize(
+    "cron_expr, from_dt, n, expected_list",
+    [
+        (
+            "0/23 * * * ? *",
+            datetime.datetime(2021, 8, 7, 11, 50, 57, tzinfo=datetime.timezone.utc),
+            10,
+            [
+                datetime.datetime(2021, 8, 7, 11, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            "0/5 8-17 ? * MON-FRI *",
+            datetime.datetime(2021, 8, 16, 8, 50, 57, tzinfo=datetime.timezone.utc),
+            10,
+            [
+                datetime.datetime(2021, 8, 16, 8, 45, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 40, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 35, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 30, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 25, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 20, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 15, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 10, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 5, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 16, 8, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+    ],
+)
+def test_get_prev(cron_expr, from_dt, n, expected_list):
+    """Parameterized test for get_prev method."""
+    itr = AwsCroniter(cron_expr)
+    result = itr.get_prev(from_dt, n)
     assert str(expected_list) == str(result)
