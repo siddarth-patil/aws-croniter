@@ -99,9 +99,6 @@ class AwsCroniter:
             raise Exception("Occurrence utc_datetime must have tzinfo == datetime.timezone.utc")
         return Occurrence(self, utc_datetime)
 
-    def __str__(self):
-        return f"cron({self.cron})"
-
     def __replace(self, s, rules):
         rs = str(s).upper()
         for rule in rules:
@@ -202,7 +199,7 @@ class AwsCroniter:
         """
         if not isinstance(from_date, datetime.datetime):
             raise ValueError(
-                "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
             )
         else:
             schedule_list = list()
@@ -228,13 +225,13 @@ class AwsCroniter:
             isinstance(from_date, type(to_date)) or isinstance(to_date, type(from_date))
         ):
             raise ValueError(
-                "The from_date and to_date must be same type." "  {0} != {1}".format(type(from_date), type(to_date))
+                "The from_date and to_date must be same type. {0} != {1}".format(type(from_date), type(to_date))
             )
 
         elif not isinstance(from_date, datetime.datetime) or (from_date.tzinfo != datetime.timezone.utc):
             raise ValueError(
-                "Invalid from_date and to_date. Must be of type datetime.datetime"
-                " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date and to_date. Must be of type datetime.datetime "
+                "and have tzinfo = datetime.timezone.utc"
             )
         else:
             schedule_list = []

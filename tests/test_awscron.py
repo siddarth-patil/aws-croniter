@@ -278,6 +278,28 @@ def test_get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_en
     assert str(expected_list) == str(result)
 
 
+@pytest.mark.parametrize(
+    "from_date, to_date, expected_error",
+    [
+        (
+            "invalid_date",
+            datetime.datetime(2021, 8, 7, 8, 46, 57, tzinfo=datetime.timezone.utc),
+            "The from_date and to_date must be same type. <class 'str'> != <class 'datetime.datetime'>",
+        ),
+        (
+            "invalid_date",
+            "invalid_date",
+            "Invalid from_date and to_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc",
+        ),
+    ],
+)
+def test_get_all_schedule_bw_dates_errors(from_date, to_date, expected_error):
+    """Test that get_all_schedule_bw_dates raises ValueError for invalid from_date or to_date."""
+    itr = AwsCroniter("0/5 8-17 ? * MON-FRI *")
+    with pytest.raises(ValueError, match=expected_error):
+        itr.get_all_schedule_bw_dates(from_date, to_date)
+
+
 def test_get_next():
     """Testing - retrieve n number of datetimes after start date when AWS cron expression is set to
     run every 23 minutes. cron(Minutes Hours Day-of-month Month Day-of-week Year)
@@ -299,6 +321,13 @@ def test_get_next():
     itr = AwsCroniter("0/23 * * * ? *")
     result = itr.get_next(from_dt, 10)
     assert str(expected_list) == str(result)
+
+
+def test_get_next_error():
+    expected_error = "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
+    itr = AwsCroniter("0/5 8-17 ? * MON-FRI *")
+    with pytest.raises(ValueError, match=expected_error):
+        itr.get_next("invalid_date")
 
 
 @pytest.mark.parametrize(
@@ -345,3 +374,10 @@ def test_get_prev(cron_expr, from_dt, n, expected_list):
     itr = AwsCroniter(cron_expr)
     result = itr.get_prev(from_dt, n)
     assert str(expected_list) == str(result)
+
+
+def test_get_prev_error():
+    expected_error = "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
+    itr = AwsCroniter("0/5 8-17 ? * MON-FRI *")
+    with pytest.raises(ValueError, match=expected_error):
+        itr.get_prev("invalid_date")
