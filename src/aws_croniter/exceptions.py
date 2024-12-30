@@ -1,40 +1,40 @@
-class AWSCronExpressionError(ValueError):
+class AwsCroniterExpressionError(ValueError):
     """Base exception for errors in AWS cron expressions."""
 
     pass
 
 
-class AWSCronExpressionMinuteError(AWSCronExpressionError):
+class AwsCroniterExpressionMinuteError(AwsCroniterExpressionError):
     """Exception raised for invalid minute values in an AWS cron expression."""
 
     pass
 
 
-class AWSCronExpressionHourError(AWSCronExpressionError):
+class AwsCroniterExpressionHourError(AwsCroniterExpressionError):
     """Exception raised for invalid hour values in an AWS cron expression."""
 
     pass
 
 
-class AWSCronExpressionMonthError(AWSCronExpressionError):
+class AwsCroniterExpressionMonthError(AwsCroniterExpressionError):
     """Exception raised for invalid month values in an AWS cron expression."""
 
     pass
 
 
-class AWSCronExpressionYearError(AWSCronExpressionError):
+class AwsCroniterExpressionYearError(AwsCroniterExpressionError):
     """Exception raised for invalid year values in an AWS cron expression."""
 
     pass
 
 
-class AWSCronExpressionDayOfMonthError(AWSCronExpressionError):
+class AwsCroniterExpressionDayOfMonthError(AwsCroniterExpressionError):
     """Exception raised for invalid day-of-month values in an AWS cron expression."""
 
     pass
 
 
-class AWSCronExpressionDayOfWeekError(AWSCronExpressionError):
+class AwsCroniterExpressionDayOfWeekError(AwsCroniterExpressionError):
     """Exception raised for invalid day-of-week values in an AWS cron expression."""
 
     pass

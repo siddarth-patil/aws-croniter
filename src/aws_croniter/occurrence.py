@@ -9,16 +9,16 @@ from aws_croniter.utils import TimeUtils
 
 
 class Occurrence:
-    def __init__(self, AWSCron, utc_datetime):
+    def __init__(self, AwsCroniter, utc_datetime):
         if utc_datetime.tzinfo is None or utc_datetime.tzinfo != datetime.timezone.utc:
             raise Exception("Occurrence utc_datetime must have tzinfo == datetime.timezone.utc")
         self.utc_datetime = utc_datetime
-        self.cron = AWSCron
+        self.cron = AwsCroniter
         self.iter = 0
 
     def __find_once(self, parsed, datetime_from):
         if self.iter > 10:
-            raise Exception(f"AwsCronParser : this shouldn't happen, but iter {self.iter} > 10 ")
+            raise Exception(f"AwsCroniterParser : this shouldn't happen, but iter {self.iter} > 10 ")
         self.iter += 1
         current_year = datetime_from.year
         current_month = datetime_from.month
@@ -80,7 +80,7 @@ class Occurrence:
 
     def __find_prev_once(self, parsed, datetime_from: datetime):
         if self.iter > 10:
-            raise Exception("AwsCronParser : this shouldn't happen, but iter > 10")
+            raise Exception("AwsCroniterParser : this shouldn't happen, but iter > 10")
         self.iter += 1
         current_year = datetime_from.year
         current_month = datetime_from.month

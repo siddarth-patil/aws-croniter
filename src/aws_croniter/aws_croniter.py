@@ -1,18 +1,18 @@
 import datetime
 import re
 
-from aws_croniter.exceptions import AWSCronExpressionDayOfMonthError
-from aws_croniter.exceptions import AWSCronExpressionDayOfWeekError
-from aws_croniter.exceptions import AWSCronExpressionError
-from aws_croniter.exceptions import AWSCronExpressionHourError
-from aws_croniter.exceptions import AWSCronExpressionMinuteError
-from aws_croniter.exceptions import AWSCronExpressionMonthError
-from aws_croniter.exceptions import AWSCronExpressionYearError
+from aws_croniter.exceptions import AwsCroniterExpressionDayOfMonthError
+from aws_croniter.exceptions import AwsCroniterExpressionDayOfWeekError
+from aws_croniter.exceptions import AwsCroniterExpressionError
+from aws_croniter.exceptions import AwsCroniterExpressionHourError
+from aws_croniter.exceptions import AwsCroniterExpressionMinuteError
+from aws_croniter.exceptions import AwsCroniterExpressionMonthError
+from aws_croniter.exceptions import AwsCroniterExpressionYearError
 from aws_croniter.occurrence import Occurrence
 from aws_croniter.utils import RegexUtils
 
 
-class AWSCron:
+class AwsCroniter:
     MONTH_REPLACES = [
         ["JAN", "1"],
         ["FEB", "2"],
@@ -66,30 +66,30 @@ class AWSCron:
         """
         value_count = len(self.cron.split(" "))
         if value_count != 6:
-            raise AWSCronExpressionError(
+            raise AwsCroniterExpressionError(
                 f"Incorrect number of values in '{self.cron}'. 6 required, {value_count} provided."
             )
 
         minute, hour, day_of_month, month, day_of_week, year = self.cron.split(" ")
 
         if not ((day_of_month == "?" and day_of_week != "?") or (day_of_month != "?" and day_of_week == "?")):
-            raise AWSCronExpressionError(
+            raise AwsCroniterExpressionError(
                 f"Invalid combination of day-of-month '{day_of_month}' and day-of-week '{day_of_week}'."
                 "One must be a question mark (?)"
             )
 
         if not re.fullmatch(RegexUtils.minute_regex(), minute):
-            raise AWSCronExpressionMinuteError(f"Invalid minute value '{minute}'.")
+            raise AwsCroniterExpressionMinuteError(f"Invalid minute value '{minute}'.")
         if not re.fullmatch(RegexUtils.hour_regex(), hour):
-            raise AWSCronExpressionHourError(f"Invalid hour value '{hour}'.")
+            raise AwsCroniterExpressionHourError(f"Invalid hour value '{hour}'.")
         if not re.fullmatch(RegexUtils.day_of_month_regex(), day_of_month):
-            raise AWSCronExpressionDayOfMonthError(f"Invalid day-of-month value '{day_of_month}'.")
+            raise AwsCroniterExpressionDayOfMonthError(f"Invalid day-of-month value '{day_of_month}'.")
         if not re.fullmatch(RegexUtils.month_regex(), month):
-            raise AWSCronExpressionMonthError(f"Invalid month value '{month}'.")
+            raise AwsCroniterExpressionMonthError(f"Invalid month value '{month}'.")
         if not re.fullmatch(RegexUtils.day_of_week_regex(), day_of_week):
-            raise AWSCronExpressionDayOfWeekError(f"Invalid day-of-week value '{day_of_week}'.")
+            raise AwsCroniterExpressionDayOfWeekError(f"Invalid day-of-week value '{day_of_week}'.")
         if not re.fullmatch(RegexUtils.year_regex(), year):
-            raise AWSCronExpressionYearError(f"Invalid year value '{year}'.")
+            raise AwsCroniterExpressionYearError(f"Invalid year value '{year}'.")
 
         # If validation passes, then parse the cron expression
         self.__parse()
@@ -112,8 +112,8 @@ class AWSCron:
         self.minutes = self.__parse_one_rule(self.rules[0], 0, 59)
         self.hours = self.__parse_one_rule(self.rules[1], 0, 23)
         self.days_of_month = self.__parse_one_rule(self.rules[2], 1, 31)
-        self.months = self.__parse_one_rule(self.__replace(self.rules[3], AWSCron.MONTH_REPLACES), 1, 12)
-        self.days_of_week = self.__parse_one_rule(self.__replace(self.rules[4], AWSCron.DAY_WEEK_REPLACES), 1, 7)
+        self.months = self.__parse_one_rule(self.__replace(self.rules[3], AwsCroniter.MONTH_REPLACES), 1, 12)
+        self.days_of_week = self.__parse_one_rule(self.__replace(self.rules[4], AwsCroniter.DAY_WEEK_REPLACES), 1, 7)
         self.years = self.__parse_one_rule(self.rules[5], 1970, 2199)
 
     @staticmethod
@@ -185,7 +185,7 @@ class AWSCron:
                 "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
             )
         else:
-            cron_iterator = AWSCron(cron)
+            cron_iterator = AwsCroniter(cron)
             for i in range(n):
                 from_date = cron_iterator.occurrence(from_date).next()
                 schedule_list.append(from_date)
@@ -209,7 +209,7 @@ class AWSCron:
                 "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
             )
         else:
-            cron_iterator = AWSCron(cron)
+            cron_iterator = AwsCroniter(cron)
             for i in range(n):
                 from_date = cron_iterator.occurrence(from_date).prev()
                 schedule_list.append(from_date)
@@ -244,7 +244,7 @@ class AWSCron:
             )
         else:
             schedule_list = []
-            cron_iterator = AWSCron(cron)
+            cron_iterator = AwsCroniter(cron)
             start = from_date.replace(second=0, microsecond=0) - datetime.timedelta(seconds=1)
             stop = to_date.replace(second=0, microsecond=0)
 

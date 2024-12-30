@@ -2,14 +2,14 @@ import datetime
 
 import pytest
 
-from aws_croniter.awscron import AWSCron
-from aws_croniter.exceptions import AWSCronExpressionDayOfMonthError
-from aws_croniter.exceptions import AWSCronExpressionDayOfWeekError
-from aws_croniter.exceptions import AWSCronExpressionError
-from aws_croniter.exceptions import AWSCronExpressionHourError
-from aws_croniter.exceptions import AWSCronExpressionMinuteError
-from aws_croniter.exceptions import AWSCronExpressionMonthError
-from aws_croniter.exceptions import AWSCronExpressionYearError
+from aws_croniter.aws_croniter import AwsCroniter
+from aws_croniter.exceptions import AwsCroniterExpressionDayOfMonthError
+from aws_croniter.exceptions import AwsCroniterExpressionDayOfWeekError
+from aws_croniter.exceptions import AwsCroniterExpressionError
+from aws_croniter.exceptions import AwsCroniterExpressionHourError
+from aws_croniter.exceptions import AwsCroniterExpressionMinuteError
+from aws_croniter.exceptions import AwsCroniterExpressionMonthError
+from aws_croniter.exceptions import AwsCroniterExpressionYearError
 
 
 @pytest.mark.parametrize(
@@ -129,7 +129,7 @@ from aws_croniter.exceptions import AWSCronExpressionYearError
 )
 def test_cron_expressions(cron_str, expected):
     # Validation followed by Parsing of cron expression
-    cron_obj = AWSCron(cron_str)
+    cron_obj = AwsCroniter(cron_str)
     assert expected["minutes"] == cron_obj.minutes
     assert expected["hours"] == cron_obj.hours
     assert expected["daysOfMonth"] == cron_obj.days_of_month
@@ -189,7 +189,7 @@ def test_cron_expressions(cron_str, expected):
 )
 def test_valid_cron_expression(cron_str):
     try:
-        AWSCron(cron_str)
+        AwsCroniter(cron_str)
     except Exception as e:
         pytest.fail(f"Valid cron expression '{cron_str}' raised an exception: {e}")
 
@@ -197,27 +197,27 @@ def test_valid_cron_expression(cron_str):
 @pytest.mark.parametrize(
     "cron_str,exception",
     [
-        ("0 18 ? * MON-FRI", AWSCronExpressionError),
-        ("0 18 * * * *", AWSCronExpressionError),
-        ("89 10 * * ? *", AWSCronExpressionMinuteError),
-        ("65/15 10 * * ? *", AWSCronExpressionMinuteError),
-        ("5/155 10 * * ? *", AWSCronExpressionMinuteError),
-        ("0 65 * * ? *", AWSCronExpressionHourError),
-        ("0 18 32W * ? *", AWSCronExpressionDayOfMonthError),
-        ("0 18 W * ? *", AWSCronExpressionDayOfMonthError),
-        ("10 10 31 04,09,13 ? *", AWSCronExpressionMonthError),
-        ("0 9 ? * 2#6 *", AWSCronExpressionDayOfWeekError),
-        ("0,5 07/12 ? * 01,05,8 *", AWSCronExpressionDayOfWeekError),
-        ("0,5 07/12 ? * 1 2000-2200", AWSCronExpressionYearError),
-        ("15/30 10 * * ? 2400", AWSCronExpressionYearError),
-        ("0 9 ? * ? *", AWSCronExpressionError),
-        ("0 18 3L * ? *", AWSCronExpressionDayOfMonthError),
-        ("0 1-7/2,11-23/2, * * ? *", AWSCronExpressionHourError),
+        ("0 18 ? * MON-FRI", AwsCroniterExpressionError),
+        ("0 18 * * * *", AwsCroniterExpressionError),
+        ("89 10 * * ? *", AwsCroniterExpressionMinuteError),
+        ("65/15 10 * * ? *", AwsCroniterExpressionMinuteError),
+        ("5/155 10 * * ? *", AwsCroniterExpressionMinuteError),
+        ("0 65 * * ? *", AwsCroniterExpressionHourError),
+        ("0 18 32W * ? *", AwsCroniterExpressionDayOfMonthError),
+        ("0 18 W * ? *", AwsCroniterExpressionDayOfMonthError),
+        ("10 10 31 04,09,13 ? *", AwsCroniterExpressionMonthError),
+        ("0 9 ? * 2#6 *", AwsCroniterExpressionDayOfWeekError),
+        ("0,5 07/12 ? * 01,05,8 *", AwsCroniterExpressionDayOfWeekError),
+        ("0,5 07/12 ? * 1 2000-2200", AwsCroniterExpressionYearError),
+        ("15/30 10 * * ? 2400", AwsCroniterExpressionYearError),
+        ("0 9 ? * ? *", AwsCroniterExpressionError),
+        ("0 18 3L * ? *", AwsCroniterExpressionDayOfMonthError),
+        ("0 1-7/2,11-23/2, * * ? *", AwsCroniterExpressionHourError),
     ],
 )
 def test_invalid_cron_expressions(cron_str, exception):
     with pytest.raises(exception):
-        AWSCron(cron_str)
+        AwsCroniter(cron_str)
 
 
 @pytest.mark.parametrize(
@@ -273,7 +273,7 @@ def test_get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_en
     """
     Parameterized test for retrieving all schedule times between dates.
     """
-    result = AWSCron.get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_ends)
+    result = AwsCroniter.get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_ends)
     assert str(expected_list) == str(result)
 
 
@@ -295,7 +295,7 @@ def test_get_next_n_schedule():
         datetime.datetime(2021, 8, 7, 11, 46, tzinfo=datetime.timezone.utc),
     ]
     from_dt = datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc)
-    result = AWSCron.get_next_n_schedule(10, from_dt, "0/23 * * * ? *")
+    result = AwsCroniter.get_next_n_schedule(10, from_dt, "0/23 * * * ? *")
     assert str(expected_list) == str(result)  # noqa: S101
 
 
@@ -317,7 +317,7 @@ def test_get_prev_n_schedule_1():
         datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
     ]
     from_dt = datetime.datetime(2021, 8, 7, 11, 50, 57, tzinfo=datetime.timezone.utc)
-    result = AWSCron.get_prev_n_schedule(10, from_dt, "0/23 * * * ? *")
+    result = AwsCroniter.get_prev_n_schedule(10, from_dt, "0/23 * * * ? *")
     assert str(expected_list) == str(result)
 
 
@@ -340,5 +340,5 @@ def test_get_prev_n_schedule_2():
         datetime.datetime(2021, 8, 16, 8, 0, tzinfo=datetime.timezone.utc),
     ]
     from_dt = datetime.datetime(2021, 8, 16, 8, 50, 57, tzinfo=datetime.timezone.utc)
-    result = AWSCron.get_prev_n_schedule(10, from_dt, "0/5 8-17 ? * MON-FRI *")
+    result = AwsCroniter.get_prev_n_schedule(10, from_dt, "0/5 8-17 ? * MON-FRI *")
     assert str(expected_list) == str(result)
