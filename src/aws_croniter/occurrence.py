@@ -9,16 +9,16 @@ from aws_croniter.utils import TimeUtils
 
 
 class Occurrence:
-    def __init__(self, AWSCron, utc_datetime):
+    def __init__(self, AwsCroniter, utc_datetime):
         if utc_datetime.tzinfo is None or utc_datetime.tzinfo != datetime.timezone.utc:
             raise Exception("Occurrence utc_datetime must have tzinfo == datetime.timezone.utc")
         self.utc_datetime = utc_datetime
-        self.cron = AWSCron
+        self.cron = AwsCroniter
         self.iter = 0
 
     def __find_once(self, parsed, datetime_from):
         if self.iter > 10:
-            raise Exception(f"AwsCronParser : this shouldn't happen, but iter {self.iter} > 10 ")
+            raise Exception(f"AwsCroniterParser : this shouldn't happen, but iter {self.iter} > 10 ")
         self.iter += 1
         current_year = datetime_from.year
         current_month = datetime_from.month
@@ -80,7 +80,7 @@ class Occurrence:
 
     def __find_prev_once(self, parsed, datetime_from: datetime):
         if self.iter > 10:
-            raise Exception("AwsCronParser : this shouldn't happen, but iter > 10")
+            raise Exception("AwsCroniterParser : this shouldn't happen, but iter > 10")
         self.iter += 1
         current_year = datetime_from.year
         current_month = datetime_from.month
@@ -142,31 +142,31 @@ class Occurrence:
 
         return datetime.datetime(year, month, day_of_month, hour, minute, tzinfo=datetime.timezone.utc)
 
-    def next(self, datetime_inclusive=False):
+    def next(self, inclusive=False):
         """
         Generate the next occurrence after the current time.
 
-        :param datetime_inclusive: If True, include the current time if it matches a valid execution.
+        :param inclusive: If True, include the current time if it matches a valid execution.
         :return: The next occurrence as a datetime object.
         """
         self.iter = 0
         from_epoch = (math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) + 1) * 60000
-        if datetime_inclusive:
+        if inclusive:
             # Do not add extra minute, include current time
             from_epoch = math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)
         return self.__find_once(self.cron, dt)
 
-    def prev(self, datetime_inclusive=False):
+    def prev(self, inclusive=False):
         """
         Generate the prev before the occurrence date value
 
-        :param datetime_inclusive: If True, include the current time if it matches a valid execution.
+        :param inclusive: If True, include the current time if it matches a valid execution.
         :return: The next occurrence as a datetime object.
         """
         self.iter = 0
         from_epoch = (math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) - 1) * 60000
-        if datetime_inclusive:
+        if inclusive:
             # Do not subtract extra minute, include current time
             from_epoch = math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)

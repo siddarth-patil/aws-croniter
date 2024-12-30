@@ -1,18 +1,18 @@
 import datetime
 import re
 
-from aws_croniter.exceptions import AWSCronExpressionDayOfMonthError
-from aws_croniter.exceptions import AWSCronExpressionDayOfWeekError
-from aws_croniter.exceptions import AWSCronExpressionError
-from aws_croniter.exceptions import AWSCronExpressionHourError
-from aws_croniter.exceptions import AWSCronExpressionMinuteError
-from aws_croniter.exceptions import AWSCronExpressionMonthError
-from aws_croniter.exceptions import AWSCronExpressionYearError
+from aws_croniter.exceptions import AwsCroniterExpressionDayOfMonthError
+from aws_croniter.exceptions import AwsCroniterExpressionDayOfWeekError
+from aws_croniter.exceptions import AwsCroniterExpressionError
+from aws_croniter.exceptions import AwsCroniterExpressionHourError
+from aws_croniter.exceptions import AwsCroniterExpressionMinuteError
+from aws_croniter.exceptions import AwsCroniterExpressionMonthError
+from aws_croniter.exceptions import AwsCroniterExpressionYearError
 from aws_croniter.occurrence import Occurrence
 from aws_croniter.utils import RegexUtils
 
 
-class AWSCron:
+class AwsCroniter:
     MONTH_REPLACES = [
         ["JAN", "1"],
         ["FEB", "2"],
@@ -66,30 +66,30 @@ class AWSCron:
         """
         value_count = len(self.cron.split(" "))
         if value_count != 6:
-            raise AWSCronExpressionError(
+            raise AwsCroniterExpressionError(
                 f"Incorrect number of values in '{self.cron}'. 6 required, {value_count} provided."
             )
 
         minute, hour, day_of_month, month, day_of_week, year = self.cron.split(" ")
 
         if not ((day_of_month == "?" and day_of_week != "?") or (day_of_month != "?" and day_of_week == "?")):
-            raise AWSCronExpressionError(
+            raise AwsCroniterExpressionError(
                 f"Invalid combination of day-of-month '{day_of_month}' and day-of-week '{day_of_week}'."
                 "One must be a question mark (?)"
             )
 
         if not re.fullmatch(RegexUtils.minute_regex(), minute):
-            raise AWSCronExpressionMinuteError(f"Invalid minute value '{minute}'.")
+            raise AwsCroniterExpressionMinuteError(f"Invalid minute value '{minute}'.")
         if not re.fullmatch(RegexUtils.hour_regex(), hour):
-            raise AWSCronExpressionHourError(f"Invalid hour value '{hour}'.")
+            raise AwsCroniterExpressionHourError(f"Invalid hour value '{hour}'.")
         if not re.fullmatch(RegexUtils.day_of_month_regex(), day_of_month):
-            raise AWSCronExpressionDayOfMonthError(f"Invalid day-of-month value '{day_of_month}'.")
+            raise AwsCroniterExpressionDayOfMonthError(f"Invalid day-of-month value '{day_of_month}'.")
         if not re.fullmatch(RegexUtils.month_regex(), month):
-            raise AWSCronExpressionMonthError(f"Invalid month value '{month}'.")
+            raise AwsCroniterExpressionMonthError(f"Invalid month value '{month}'.")
         if not re.fullmatch(RegexUtils.day_of_week_regex(), day_of_week):
-            raise AWSCronExpressionDayOfWeekError(f"Invalid day-of-week value '{day_of_week}'.")
+            raise AwsCroniterExpressionDayOfWeekError(f"Invalid day-of-week value '{day_of_week}'.")
         if not re.fullmatch(RegexUtils.year_regex(), year):
-            raise AWSCronExpressionYearError(f"Invalid year value '{year}'.")
+            raise AwsCroniterExpressionYearError(f"Invalid year value '{year}'.")
 
         # If validation passes, then parse the cron expression
         self.__parse()
@@ -98,9 +98,6 @@ class AWSCron:
         if utc_datetime.tzinfo is None or utc_datetime.tzinfo != datetime.timezone.utc:
             raise Exception("Occurrence utc_datetime must have tzinfo == datetime.timezone.utc")
         return Occurrence(self, utc_datetime)
-
-    def __str__(self):
-        return f"cron({self.cron})"
 
     def __replace(self, s, rules):
         rs = str(s).upper()
@@ -112,8 +109,8 @@ class AWSCron:
         self.minutes = self.__parse_one_rule(self.rules[0], 0, 59)
         self.hours = self.__parse_one_rule(self.rules[1], 0, 23)
         self.days_of_month = self.__parse_one_rule(self.rules[2], 1, 31)
-        self.months = self.__parse_one_rule(self.__replace(self.rules[3], AWSCron.MONTH_REPLACES), 1, 12)
-        self.days_of_week = self.__parse_one_rule(self.__replace(self.rules[4], AWSCron.DAY_WEEK_REPLACES), 1, 7)
+        self.months = self.__parse_one_rule(self.__replace(self.rules[3], AwsCroniter.MONTH_REPLACES), 1, 12)
+        self.days_of_week = self.__parse_one_rule(self.__replace(self.rules[4], AwsCroniter.DAY_WEEK_REPLACES), 1, 7)
         self.years = self.__parse_one_rule(self.rules[5], 1970, 2199)
 
     @staticmethod
@@ -169,63 +166,57 @@ class AWSCron:
         allows.sort()
         return allows
 
-    @staticmethod
-    def get_next_n_schedule(n, from_date, cron):
+    def get_next(self, from_date, n=1, inclusive=False):
         """
         Returns a list with the n next datetime(s) that match the aws cron expression from the provided start date.
 
-        :param n: Int of the n next datetime(s)
         :param from_date: datetime with the start date
-        :param cron: str of aws cron to be parsed
+        :param n: Int of the n next datetime(s), defaults to 1
+        :param inclusive: If True, include the from_date time if it matches a valid execution.
         :return: list of datetime objects
         """
-        schedule_list = list()
         if not isinstance(from_date, datetime.datetime):
             raise ValueError(
-                "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
             )
         else:
-            cron_iterator = AWSCron(cron)
+            schedule_list = list()
             for i in range(n):
-                from_date = cron_iterator.occurrence(from_date).next()
+                from_date = self.occurrence(from_date).next(inclusive=(inclusive and i == 0))
                 schedule_list.append(from_date)
 
             return schedule_list
 
-    @staticmethod
-    def get_prev_n_schedule(n, from_date, cron):
+    def get_prev(self, from_date, n=1, inclusive=False):
         """
         Returns a list with the n prev datetime(s) that match the aws cron expression
         from the provided start date.
 
-        :param n: Int of the n next datetime(s)
         :param from_date: datetime with the start date
-        :param cron: str of aws cron to be parsed
+        :param n: Int of the n next datetime(s), defaults to 1
+        :param inclusive: If True, include the from_date time if it matches a valid execution.
         :return: list of datetime objects
         """
-        schedule_list = list()
         if not isinstance(from_date, datetime.datetime):
             raise ValueError(
-                "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
             )
         else:
-            cron_iterator = AWSCron(cron)
+            schedule_list = list()
             for i in range(n):
-                from_date = cron_iterator.occurrence(from_date).prev()
+                from_date = self.occurrence(from_date).prev(inclusive=(inclusive and i == 0))
                 schedule_list.append(from_date)
 
             return schedule_list
 
-    @staticmethod
-    def get_all_schedule_bw_dates(from_date, to_date, cron, exclude_ends=False):
+    def get_all_schedule_bw_dates(self, from_date, to_date, exclude_ends=False):
         """
-        Get all datetimes from from_date to to_date matching the given cron expression.
+        Get all datetime(s) from from_date to to_date matching the given cron expression.
         If the cron expression matches either 'from_date' and/or 'to_date',
         those times will be returned as well unless 'exclude_ends=True' is passed.
 
         :param from_date: datetime object from where the schedule will start with tzinfo in utc.
         :param to_date: datetime object to where the schedule will end with tzinfo in utc.
-        :param cron: str of aws cron to be parsed
         :param exclude_ends: bool defaulted to False, to not exclude the end date
         :return: list of datetime objects
         """
@@ -234,22 +225,21 @@ class AWSCron:
             isinstance(from_date, type(to_date)) or isinstance(to_date, type(from_date))
         ):
             raise ValueError(
-                "The from_date and to_date must be same type." "  {0} != {1}".format(type(from_date), type(to_date))
+                "The from_date and to_date must be same type. {0} != {1}".format(type(from_date), type(to_date))
             )
 
         elif not isinstance(from_date, datetime.datetime) or (from_date.tzinfo != datetime.timezone.utc):
             raise ValueError(
-                "Invalid from_date and to_date. Must be of type datetime.datetime"
-                " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date and to_date. Must be of type datetime.datetime "
+                "and have tzinfo = datetime.timezone.utc"
             )
         else:
             schedule_list = []
-            cron_iterator = AWSCron(cron)
             start = from_date.replace(second=0, microsecond=0) - datetime.timedelta(seconds=1)
             stop = to_date.replace(second=0, microsecond=0)
 
             while start is not None and start <= stop:
-                start = cron_iterator.occurrence(start).next()
+                start = self.occurrence(start).next()
                 if start is None or start > stop:
                     break
                 schedule_list.append(start)
