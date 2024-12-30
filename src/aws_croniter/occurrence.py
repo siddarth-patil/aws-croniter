@@ -142,31 +142,31 @@ class Occurrence:
 
         return datetime.datetime(year, month, day_of_month, hour, minute, tzinfo=datetime.timezone.utc)
 
-    def next(self, datetime_inclusive=False):
+    def next(self, inclusive=False):
         """
         Generate the next occurrence after the current time.
 
-        :param datetime_inclusive: If True, include the current time if it matches a valid execution.
+        :param inclusive: If True, include the current time if it matches a valid execution.
         :return: The next occurrence as a datetime object.
         """
         self.iter = 0
         from_epoch = (math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) + 1) * 60000
-        if datetime_inclusive:
+        if inclusive:
             # Do not add extra minute, include current time
             from_epoch = math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)
         return self.__find_once(self.cron, dt)
 
-    def prev(self, datetime_inclusive=False):
+    def prev(self, inclusive=False):
         """
         Generate the prev before the occurrence date value
 
-        :param datetime_inclusive: If True, include the current time if it matches a valid execution.
+        :param inclusive: If True, include the current time if it matches a valid execution.
         :return: The next occurrence as a datetime object.
         """
         self.iter = 0
         from_epoch = (math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) - 1) * 60000
-        if datetime_inclusive:
+        if inclusive:
             # Do not subtract extra minute, include current time
             from_epoch = math.floor(TimeUtils.datetime_to_millisec(self.utc_datetime) / 60000.0) * 60000
         dt = datetime.datetime.fromtimestamp(from_epoch / 1000.0, tz=datetime.timezone.utc)

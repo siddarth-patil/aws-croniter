@@ -5,12 +5,12 @@ import pytest
 from aws_croniter.aws_croniter import AwsCroniter
 
 
-def test_generate_next_occurrence_with_datetime_inclusive():
+def test_generate_next_occurrence_with_inclusive():
     cron = "23 17 25 7 ? 2020"
     expected_occurrence = "2020-07-25 17:23:00+00:00"
     cron = AwsCroniter(cron)
     dt = datetime.datetime(2020, 7, 25, 17, 23, 57, tzinfo=datetime.timezone.utc)
-    dt = cron.occurrence(dt).next(datetime_inclusive=True)
+    dt = cron.occurrence(dt).next(inclusive=True)
     assert expected_occurrence == str(dt)
 
 
@@ -208,10 +208,10 @@ def test_generate_multiple_prev_occurrences1():
         assert str(dt) == expected
 
 
-def test_generate_prev_occurrence_with_datetime_inclusive():
+def test_generate_prev_occurrence_with_inclusive():
     cron = "23 17 25 7 ? 2020"
     expected_occurrence = "2020-07-25 17:23:00+00:00"
     cron = AwsCroniter(cron)
     dt = datetime.datetime(2020, 7, 25, 17, 23, 57, tzinfo=datetime.timezone.utc)
-    dt = cron.occurrence(dt).prev(datetime_inclusive=True)
+    dt = cron.occurrence(dt).prev(inclusive=True)
     assert expected_occurrence == str(dt)

@@ -169,63 +169,57 @@ class AwsCroniter:
         allows.sort()
         return allows
 
-    @staticmethod
-    def get_next_n_schedule(n, from_date, cron):
+    def get_next(self, from_date, n=1, inclusive=False):
         """
         Returns a list with the n next datetime(s) that match the aws cron expression from the provided start date.
 
-        :param n: Int of the n next datetime(s)
         :param from_date: datetime with the start date
-        :param cron: str of aws cron to be parsed
+        :param n: Int of the n next datetime(s), defaults to 1
+        :param inclusive: If True, include the from_date time if it matches a valid execution.
         :return: list of datetime objects
         """
-        schedule_list = list()
         if not isinstance(from_date, datetime.datetime):
             raise ValueError(
-                "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
             )
         else:
-            cron_iterator = AwsCroniter(cron)
+            schedule_list = list()
             for i in range(n):
-                from_date = cron_iterator.occurrence(from_date).next()
+                from_date = self.occurrence(from_date).next(inclusive=(inclusive and i == 0))
                 schedule_list.append(from_date)
 
             return schedule_list
 
-    @staticmethod
-    def get_prev_n_schedule(n, from_date, cron):
+    def get_prev(self, from_date, n=1, inclusive=False):
         """
         Returns a list with the n prev datetime(s) that match the aws cron expression
         from the provided start date.
 
-        :param n: Int of the n next datetime(s)
         :param from_date: datetime with the start date
-        :param cron: str of aws cron to be parsed
+        :param n: Int of the n next datetime(s), defaults to 1
+        :param inclusive: If True, include the from_date time if it matches a valid execution.
         :return: list of datetime objects
         """
-        schedule_list = list()
         if not isinstance(from_date, datetime.datetime):
             raise ValueError(
                 "Invalid from_date. Must be of type datetime.datetime" " and have tzinfo = datetime.timezone.utc"
             )
         else:
-            cron_iterator = AwsCroniter(cron)
+            schedule_list = list()
             for i in range(n):
-                from_date = cron_iterator.occurrence(from_date).prev()
+                from_date = self.occurrence(from_date).prev(inclusive=(inclusive and i == 0))
                 schedule_list.append(from_date)
 
             return schedule_list
 
-    @staticmethod
-    def get_all_schedule_bw_dates(from_date, to_date, cron, exclude_ends=False):
+    def get_all_schedule_bw_dates(self, from_date, to_date, exclude_ends=False):
         """
-        Get all datetimes from from_date to to_date matching the given cron expression.
+        Get all datetime(s) from from_date to to_date matching the given cron expression.
         If the cron expression matches either 'from_date' and/or 'to_date',
         those times will be returned as well unless 'exclude_ends=True' is passed.
 
         :param from_date: datetime object from where the schedule will start with tzinfo in utc.
         :param to_date: datetime object to where the schedule will end with tzinfo in utc.
-        :param cron: str of aws cron to be parsed
         :param exclude_ends: bool defaulted to False, to not exclude the end date
         :return: list of datetime objects
         """
@@ -244,12 +238,11 @@ class AwsCroniter:
             )
         else:
             schedule_list = []
-            cron_iterator = AwsCroniter(cron)
             start = from_date.replace(second=0, microsecond=0) - datetime.timedelta(seconds=1)
             stop = to_date.replace(second=0, microsecond=0)
 
             while start is not None and start <= stop:
-                start = cron_iterator.occurrence(start).next()
+                start = self.occurrence(start).next()
                 if start is None or start > stop:
                     break
                 schedule_list.append(start)

@@ -273,11 +273,12 @@ def test_get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_en
     """
     Parameterized test for retrieving all schedule times between dates.
     """
-    result = AwsCroniter.get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_ends)
+    itr = AwsCroniter(cron_expression)
+    result = itr.get_all_schedule_bw_dates(from_dt, to_date, exclude_ends)
     assert str(expected_list) == str(result)
 
 
-def test_get_next_n_schedule():
+def test_get_next():
     """Testing - retrieve n number of datetimes after start date when AWS cron expression is set to
     run every 23 minutes. cron(Minutes Hours Day-of-month Month Day-of-week Year)
     Where start datetime is 8/7/2021 8:30:57 UTC
@@ -295,11 +296,12 @@ def test_get_next_n_schedule():
         datetime.datetime(2021, 8, 7, 11, 46, tzinfo=datetime.timezone.utc),
     ]
     from_dt = datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc)
-    result = AwsCroniter.get_next_n_schedule(10, from_dt, "0/23 * * * ? *")
-    assert str(expected_list) == str(result)  # noqa: S101
+    itr = AwsCroniter("0/23 * * * ? *")
+    result = itr.get_next(from_dt, 10)
+    assert str(expected_list) == str(result)
 
 
-def test_get_prev_n_schedule_1():
+def test_get_prev_1():
     """Testing - retrieve n number of datetimes before start date when AWS cron expression is set to
     run every 23 minutes. cron(Minutes Hours Day-of-month Month Day-of-week Year)
     Where start datetime is 8/7/2021 11:50:57 UTC
@@ -317,11 +319,12 @@ def test_get_prev_n_schedule_1():
         datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
     ]
     from_dt = datetime.datetime(2021, 8, 7, 11, 50, 57, tzinfo=datetime.timezone.utc)
-    result = AwsCroniter.get_prev_n_schedule(10, from_dt, "0/23 * * * ? *")
+    itr = AwsCroniter("0/23 * * * ? *")
+    result = itr.get_prev(from_dt, 10)
     assert str(expected_list) == str(result)
 
 
-def test_get_prev_n_schedule_2():
+def test_get_prev_2():
     """Testing - retrieve n number of datetimes before start date when AWS cron expression is set to
     run every 5 minutes Monday through Friday between 8:00 am and 5:55 pm (UTC).
     cron(Minutes Hours Day-of-month Month Day-of-week Year)
@@ -340,5 +343,6 @@ def test_get_prev_n_schedule_2():
         datetime.datetime(2021, 8, 16, 8, 0, tzinfo=datetime.timezone.utc),
     ]
     from_dt = datetime.datetime(2021, 8, 16, 8, 50, 57, tzinfo=datetime.timezone.utc)
-    result = AwsCroniter.get_prev_n_schedule(10, from_dt, "0/5 8-17 ? * MON-FRI *")
+    itr = AwsCroniter("0/5 8-17 ? * MON-FRI *")
+    result = itr.get_prev(from_dt, 10)
     assert str(expected_list) == str(result)
