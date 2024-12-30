@@ -32,7 +32,7 @@ pip install aws-croniter
 Here is a basic example of how to use AWS Croniter:
 
 ```python
-from aws_cronite import AwsCroniter
+from aws_croniter import AwsCroniter
 
 # Example AWS cron expression
 cron_expression = "0 12 15 * ? 2023"
@@ -43,7 +43,7 @@ aws_cron = AwsCroniter(cron_expression)
 Getting the Next Occurrence
 
 ```python
-from aws_cronite import AwsCroniter
+from aws_croniter import AwsCroniter
 from datetime import datetime, timezone
 
 # Example AWS cron expression
@@ -54,13 +54,13 @@ start_date = datetime(2023, 12, 14, tzinfo=timezone.utc)
 next_occurrence = aws_cron.get_next(start_date)
 
 print(next_occurrence)
-## Results in [datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc)]
+## Results in: [datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc)]
 ```
 
 Getting the Previous Occurrence
 
 ```python
-from aws_cronite import AwsCroniter
+from aws_croniter import AwsCroniter
 from datetime import datetime, timezone
 
 # Example AWS cron expression
@@ -71,24 +71,26 @@ start_date = datetime(2023, 12, 14, tzinfo=timezone.utc)
 prev_occurrence = aws_cron.get_prev(start_date)
 
 print(prev_occurrence)
+## Results in: [datetime.datetime(2023, 11, 15, 12, 0, tzinfo=datetime.timezone.utc)]
 ```
 
 Getting All Occurrences Between Two Dates
 
 ```python
-from aws_cronite import AwsCroniter
+from aws_croniter import AwsCroniter
 from datetime import datetime, timezone
 
 # Example AWS cron expression
 cron_expression = "0 12 15 * ? 2023"
 
 aws_cron = AwsCroniter(cron_expression)
-from_date = datetime(2023, 12, 14, tzinfo=timezone.utc)
+from_date = datetime(2023, 11, 14, tzinfo=timezone.utc)
 to_date = datetime(2023, 12, 31, tzinfo=timezone.utc)
 
 all_occurrences = aws_cron.get_all_schedule_bw_dates(from_date, to_date)
 
 print(all_occurrences)
+## Results in: [datetime.datetime(2023, 11, 15, 12, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc)]
 ```
 
 Handling Validation Errors
@@ -96,13 +98,15 @@ Handling Validation Errors
 If an invalid AWS cron expression is provided, AwsCroniter raises specific exceptions indicating the type of error:
 
 ```python
-from aws_cronite.exceptions import AwsCroniterExpressionError
+from aws_croniter import AwsCroniter
+from aws_croniter.exceptions import AwsCroniterExpressionError
 
 try:
     invalid_cron = "0 18 ? * MON-FRI"  # Missing required fields
     AwsCroniter(invalid_cron)
 except AwsCroniterExpressionError as e:
     print(f"Invalid cron expression: {e}")
+## Results in: Invalid cron expression: Incorrect number of values in '0 18 ? * MON-FRI'. 6 required, 5 provided.
 ```
 
 ## Contributing
