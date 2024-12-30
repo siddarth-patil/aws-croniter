@@ -1,13 +1,26 @@
 ![PyPI](https://img.shields.io/pypi/v/aws-croniter)
-![Tests](https://github.com/siddarth-patil/aws-croniter/actions/workflows/tests.yml/badge.svg)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/aws-croniter)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aws-croniter)
 [![GitHub stars](https://img.shields.io/github/stars/siddarth-patil/aws-croniter)](https://github.com/siddarth-patil/aws-croniter/stargazers)
+![Tests](https://github.com/siddarth-patil/aws-croniter/actions/workflows/tests.yml/badge.svg)
 
 # AWS Croniter
 
 AWS Croniter is a Python package for parsing, validating, and calculating occurrences of AWS EventBridge cron
 expressions. AWS cron expressions are a powerful way to schedule events, but they differ from standard Unix cron syntax.
 This library makes it easy to work with AWS-specific cron schedules programmatically.
+
+## Inspiration
+
+AWS Croniter was inspired by two existing packages, [
+`aws-cron-expression-validator`](https://github.com/grumBit/aws_cron_expression_validator) and [
+`pyawscron`](https://github.com/pitchblack408/pyawscron), which serve similar purposes. The
+`aws-cron-expression-validator` package focuses solely on validating AWS cron expressions, while `pyawscron` provides
+functionality for parsing and calculating schedules such as next and previous occurrences. However, both packages had
+limitations, including unresolved bugs, and users often needed to install and integrate both packages to work
+effectively with AWS cron schedules. AWS Croniter was developed to address these issues by combining the features of
+both packages into a single, robust solution that not only fixes existing bugs but also provides an improved and
+comprehensive tool for working with AWS cron expressions.
 
 ## Features
 
