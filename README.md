@@ -1,6 +1,12 @@
+![PyPI](https://img.shields.io/pypi/v/aws-croniter)
+![Tests](https://github.com/siddarth-patil/aws-croniter/actions/workflows/tests.yml/badge.svg)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aws-croniter)
+[![GitHub stars](https://img.shields.io/github/stars/siddarth-patil/aws-croniter)](https://github.com/siddarth-patil/aws-croniter/stargazers)
+
 # AWS Croniter
 
-AWS Croniter is a Python library that provides utilities for working with AWS cron expressions. It allows you to easily parse, manipulate, and validate cron expressions used in AWS services like CloudWatch and EventBridge.
+AWS Croniter is a Python library that provides utilities for working with AWS cron expressions. It allows you to easily
+parse, manipulate, and validate cron expressions used in AWS services like CloudWatch and EventBridge.
 
 ## Features
 
@@ -50,4 +56,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-For any questions or suggestions, please open an issue or contact the maintainer at [email@example.com](mailto:email@example.com).
+For any questions or suggestions, please open an issue or contact the maintainer
+at [email@example.com](mailto:email@example.com).
