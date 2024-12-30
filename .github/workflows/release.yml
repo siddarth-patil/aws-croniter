@@ -90,7 +90,7 @@ jobs:
         run: poetry install --sync --no-interaction
 
       - name: Run Tests in parallel
-        run: poetry run tox -p
+        run: poetry run tox
 
       - name: Build source and wheel distribution
         run: |
