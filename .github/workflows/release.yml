@@ -95,7 +95,7 @@ jobs:
           fi
 
   setup_and_build:
-    needs: [ check_pypi ]
+    needs: [ details, check_pypi ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -129,7 +129,7 @@ jobs:
 
   pypi_publish:
     name: Upload release to PyPI
-    needs: [ setup_and_build ]
+    needs: [ setup_and_build, details ]
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -147,7 +147,7 @@ jobs:
 
   github_release:
     name: Create GitHub Release
-    needs: [ details, setup_and_build ]
+    needs: [ setup_and_build, details ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
