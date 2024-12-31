@@ -38,10 +38,9 @@ AWS Croniter was inspired by two existing packages, [
 `pyawscron`](https://github.com/pitchblack408/pyawscron), which serve similar purposes. The
 `aws-cron-expression-validator` package focuses solely on validating AWS cron expressions, while `pyawscron` provides
 functionality for parsing and calculating schedules such as next and previous occurrences. However, both packages had
-limitations, including unresolved bugs, and users often needed to install and integrate both packages to work
-effectively with AWS cron schedules. AWS Croniter was developed to address these issues by combining the features of
-both packages into a single, robust solution that not only fixes existing bugs but also provides an improved and
-comprehensive tool for working with AWS cron expressions.
+limitations, and users often needed to install and integrate both packages to work effectively with AWS cron schedules.
+AWS Croniter was developed to address these issues by combining the features of both packages into a single, robust
+solution that also provides an improved and comprehensive tool for working with AWS cron expressions.
 
 ---
 
