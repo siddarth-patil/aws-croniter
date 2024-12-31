@@ -40,8 +40,36 @@ jobs:
             exit 1
           fi
 
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12' ]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 - --version 1.8.3
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          poetry add tox-gh-actions
+          poetry install --sync --no-interaction
+
+      - name: Run Tests in Parallel with Tox
+        run: poetry run tox -p
+
   check_pypi:
-    needs: details
+    needs: [ details, test ]
     runs-on: ubuntu-latest
     steps:
       - name: Fetch information from PyPI
@@ -67,7 +95,7 @@ jobs:
           fi
 
   setup_and_build:
-    needs: [ details, check_pypi ]
+    needs: [ check_pypi ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -89,9 +117,6 @@ jobs:
       - name: Install dependencies
         run: poetry install --sync --no-interaction
 
-      - name: Run Tests in parallel
-        run: poetry run tox
-
       - name: Build source and wheel distribution
         run: |
           poetry build
@@ -104,7 +129,7 @@ jobs:
 
   pypi_publish:
     name: Upload release to PyPI
-    needs: [ setup_and_build, details ]
+    needs: [ setup_and_build ]
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -122,7 +147,7 @@ jobs:
 
   github_release:
     name: Create GitHub Release
-    needs: [ setup_and_build, details ]
+    needs: [ setup_and_build ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
