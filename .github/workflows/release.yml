@@ -147,7 +147,7 @@ jobs:
 
   github_release:
     name: Create GitHub Release
-    needs: [ setup_and_build ]
+    needs: [ details, setup_and_build ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
