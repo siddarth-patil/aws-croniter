@@ -300,26 +300,52 @@ def test_get_all_schedule_bw_dates_errors(from_date, to_date, expected_error):
         itr.get_all_schedule_bw_dates(from_date, to_date)
 
 
-def test_get_next():
-    """Testing - retrieve n number of datetimes after start date when AWS cron expression is set to
-    run every 23 minutes. cron(Minutes Hours Day-of-month Month Day-of-week Year)
-    Where start datetime is 8/7/2021 8:30:57 UTC
+@pytest.mark.parametrize(
+    "cron_expression, from_dt, n, expected_list",
+    [
+        (
+            "0/23 * * * ? *",
+            datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc),
+            10,
+            [
+                datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 9, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 10, 46, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 23, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2021, 8, 7, 11, 46, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            "0 12 15 * ? 2023",
+            datetime.datetime(2023, 12, 14, tzinfo=datetime.timezone.utc),
+            10,
+            [
+                datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ],
+        ),
+    ],
+)
+def test_get_next_parameterized(cron_expression, from_dt, n, expected_list):
     """
-    expected_list = [
-        datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 9, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 10, 46, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 11, 23, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2021, 8, 7, 11, 46, tzinfo=datetime.timezone.utc),
-    ]
-    from_dt = datetime.datetime(2021, 8, 7, 8, 30, 57, tzinfo=datetime.timezone.utc)
-    itr = AwsCroniter("0/23 * * * ? *")
-    result = itr.get_next(from_dt, 10)
+    Parameterized test for get_next method of AwsCroniter.
+    Tests retrieving n number of datetimes after start date for different AWS cron expressions.
+    """
+    itr = AwsCroniter(cron_expression)
+    result = itr.get_next(from_dt, n)
     assert str(expected_list) == str(result)
 
 
@@ -365,6 +391,23 @@ def test_get_next_error():
                 datetime.datetime(2021, 8, 16, 8, 10, tzinfo=datetime.timezone.utc),
                 datetime.datetime(2021, 8, 16, 8, 5, tzinfo=datetime.timezone.utc),
                 datetime.datetime(2021, 8, 16, 8, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            "0 12 15 1 ? 2023",
+            datetime.datetime(2023, 2, 14, tzinfo=datetime.timezone.utc),
+            10,
+            [
+                datetime.datetime(2023, 1, 15, 12, 0, tzinfo=datetime.timezone.utc),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
             ],
         ),
     ],

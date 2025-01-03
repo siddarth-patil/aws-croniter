@@ -100,7 +100,8 @@ except AwsCroniterExpressionError as e:
 
 ### **Fetching the Next Occurrence**
 
-The `get_next` method retrieves the next occurrence(s) of the cron schedule from a specified date.
+The `get_next` method retrieves the next occurrence(s) of the cron schedule from a specified date. This method
+always returns a list with `n` items and sets the items to `None` if no valid occurrences are found.
 
 #### **Basic Usage**
 
@@ -168,7 +169,8 @@ print(next_occurrence_inclusive)
 
 ### **Fetching the Previous Occurrence**
 
-The `get_prev` method retrieves the previous occurrence(s) of the cron schedule from a specified date.
+The `get_prev` method retrieves the previous occurrence(s) of the cron schedule from a specified date. This method
+always returns a list with `n` items and sets the items to `None` if no valid occurrences are found.
 
 #### **Basic Usage**
 

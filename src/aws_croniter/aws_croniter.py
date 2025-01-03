@@ -180,10 +180,12 @@ class AwsCroniter:
                 "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
             )
         else:
-            schedule_list = list()
+            schedule_list = [None] * n
             for i in range(n):
                 from_date = self.occurrence(from_date).next(inclusive=(inclusive and i == 0))
-                schedule_list.append(from_date)
+                if from_date is None:
+                    break
+                schedule_list[i] = from_date
 
             return schedule_list
 
@@ -202,10 +204,12 @@ class AwsCroniter:
                 "Invalid from_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc"
             )
         else:
-            schedule_list = list()
+            schedule_list = [None] * n
             for i in range(n):
                 from_date = self.occurrence(from_date).prev(inclusive=(inclusive and i == 0))
-                schedule_list.append(from_date)
+                if from_date is None:
+                    break
+                schedule_list[i] = from_date
 
             return schedule_list
 
