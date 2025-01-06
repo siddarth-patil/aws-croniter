@@ -128,41 +128,32 @@ class AwsCroniter:
         if "#" in rule:
             return ["#", int(rule.split("#")[0]), int(rule.split("#")[1])]
 
-        new_rule = None
-        if rule == "*":
-            new_rule = str(min_value) + "-" + str(max_value)
-        elif "/" in rule:
-            parts = rule.split("/")
-            start = None
-            end = None
-            if parts[0] == "*":
-                start = min_value
-                end = max_value
-            elif "-" in parts[0]:
-                splits = parts[0].split("-")
-                start = int(splits[0])
-                end = int(splits[1])
-            else:
-                start = int(parts[0])
-                end = max_value
-            increment = int(parts[1])
-            new_rule = ""
-            while start <= end:
-                new_rule += "," + str(start)
-                start += increment
-            new_rule = new_rule[1:]
-        else:
-            new_rule = rule
         allows = []
-        for s in new_rule.split(","):
-            if "-" in s:
-                parts = s.split("-")
-                start = int(parts[0])
-                end = int(parts[1])
-                for i in range(start, end + 1, 1):
-                    allows.append(i)
+        for subrule in rule.split(","):
+            if "/" in subrule:
+                parts = subrule.split("/")
+                start = None
+                end = None
+                if parts[0] == "*":
+                    start = min_value
+                    end = max_value
+                elif "-" in parts[0]:
+                    splits = parts[0].split("-")
+                    start = int(splits[0])
+                    end = int(splits[1])
+                else:
+                    start = int(parts[0])
+                    end = max_value
+                increment = int(parts[1])
+                allows.extend(range(start, end + 1, increment))
+            elif "-" in subrule:
+                start, end = map(int, subrule.split("-"))
+                allows.extend(range(start, end + 1))
+            elif subrule == "*":
+                allows.extend(range(min_value, max_value + 1))
             else:
-                allows.append(int(s))
+                allows.append(int(subrule))
+
         allows.sort()
         return allows
 
