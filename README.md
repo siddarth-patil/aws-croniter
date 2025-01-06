@@ -2,7 +2,9 @@
 
 AWS Croniter is a Python package for parsing, validating, and calculating occurrences of AWS EventBridge cron
 expressions. AWS cron expressions are a powerful way to schedule events, but they differ from standard Unix cron syntax.
-This library makes it easy to work with AWS-specific cron schedules programmatically.
+This library makes it easy to work
+with [AWS-specific cron](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html#eb-cron-expressions)
+schedules programmatically.
 
 ---
 

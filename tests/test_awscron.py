@@ -178,9 +178,9 @@ def test_cron_expressions(cron_str, expected):
         "0 11-23/4 ? * 2-6 *",
         "0 11-23/2 * * ? *",
         "0 0 1 1-12/3 ? *",
-        # "0 1-7/2,11-23/2 * * ? *", # TODO: To be fixed in later versions
-        # "0 1-7/2,11-23/2,10 * * ? *", # TODO: To be fixed in later versions
-        # "30 0 1 JAN-APR,JUL-OCT/2,DEC ? *", # TODO: To be fixed in later versions
+        "0 1-7/2,11-23/2 * * ? *",
+        "0 1-7/2,11-23/2,10 * * ? *",
+        "30 0 1 JAN-APR,JUL-OCT/2,DEC ? *",
         "15 10 ? * L 2019-2022",
         "15 10 ? * 6L 2019-2022",
         "15 10 ? * FRIL 2019-2022",
