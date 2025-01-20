@@ -16,6 +16,13 @@ class Occurrence:
         self.cron = AwsCroniter
         self.iter = 0
 
+    def __is_valid_date(self, year, month, day):
+        try:
+            datetime.datetime(year, month, day)
+            return True
+        except ValueError:
+            return False
+
     def __find_once(self, parsed, datetime_from):
         if self.iter > 10:
             raise Exception(f"AwsCroniterParser : this shouldn't happen, but iter {self.iter} > 10 ")
@@ -56,7 +63,7 @@ class Occurrence:
             day_of_month = SequenceUtils.array_find_first(
                 p_days_of_month, lambda c: c >= (current_day_of_month if is_same_month else 1)
             )
-        if not day_of_month:
+        if not day_of_month or not self.__is_valid_date(year, month, day_of_month):
             dt = datetime.datetime(year, month, 1, tzinfo=datetime.timezone.utc) + relativedelta(months=+1)
             return self.__find_once(parsed, dt)
 

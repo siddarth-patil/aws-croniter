@@ -349,6 +349,23 @@ def test_get_all_schedule_bw_dates_errors(from_date, to_date, expected_error):
                 None,
             ],
         ),
+        (
+            "30 9 1/4 2 ? 2025",
+            datetime.datetime(2025, 1, 21, tzinfo=datetime.timezone.utc),
+            10,
+            [
+                datetime.datetime(2025, 2, 1, 9, 30, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2025, 2, 5, 9, 30, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2025, 2, 9, 9, 30, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2025, 2, 13, 9, 30, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2025, 2, 17, 9, 30, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2025, 2, 21, 9, 30, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2025, 2, 25, 9, 30, tzinfo=datetime.timezone.utc),
+                None,
+                None,
+                None,
+            ],
+        ),
     ],
 )
 def test_get_next_parameterized(cron_expression, from_dt, n, expected_list):
