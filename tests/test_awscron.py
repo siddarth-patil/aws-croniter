@@ -104,6 +104,17 @@ from aws_croniter.exceptions import AwsCroniterExpressionYearError
             },
         ),
         (
+            "30 9 L-21 * ? *",
+            {
+                "minutes": [30],
+                "hours": [9],
+                "daysOfMonth": ["L", 21],
+                "months": list(range(1, 13)),
+                "daysOfWeek": [],
+                "years": [x for x in range(1970, 2199 + 1)],
+            },
+        ),
+        (
             "30 9 3W * ? *",
             {
                 "minutes": [30],
@@ -124,6 +135,7 @@ from aws_croniter.exceptions import AwsCroniterExpressionYearError
         "Every-5-hours-on-7th-2020",
         "Every-5-minutes-in-May-2020-2022",
         "Second-last-day-of-month",
+        "Last-day-minus-21-day-of-month",
         "Closest-weekday-to-3rd",
     ],
 )

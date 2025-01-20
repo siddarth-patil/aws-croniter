@@ -50,7 +50,7 @@ class RegexUtils:
     @classmethod
     def day_of_month_regex(cls) -> str:
         return (
-            rf"^({cls.common_regex(cls.MONTH_OF_DAY_VALUES)}|\?|L|L-[1-9]|[1-2][0-9]|3[0-1]|LW|{cls.MONTH_OF_DAY_VALUES}W)$"
+            rf"^({cls.common_regex(cls.MONTH_OF_DAY_VALUES)}|\?|L|L-({cls.MONTH_OF_DAY_VALUES})|LW|{cls.MONTH_OF_DAY_VALUES}W)$"
             # values , - * / ? L W
         )
 
