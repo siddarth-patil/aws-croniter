@@ -9,7 +9,7 @@ schedules programmatically.
 ---
 
 ![PyPI](https://img.shields.io/pypi/v/aws-croniter)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/aws-croniter)
+[![PyPI Downloads](https://static.pepy.tech/badge/aws-croniter)](https://pepy.tech/projects/aws-croniter)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aws-croniter)
 [![GitHub stars](https://img.shields.io/github/stars/siddarth-patil/aws-croniter)](https://github.com/siddarth-patil/aws-croniter/stargazers)
 ![Tests](https://github.com/siddarth-patil/aws-croniter/actions/workflows/tests.yml/badge.svg)
