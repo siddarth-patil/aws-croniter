@@ -224,6 +224,7 @@ def test_valid_cron_expression(cron_str):
         ("15/30 10 * * ? 2400", AwsCroniterExpressionYearError),
         ("0 9 ? * ? *", AwsCroniterExpressionError),
         ("0 18 3L * ? *", AwsCroniterExpressionDayOfMonthError),
+        ("0 18 L-31 * ? *", AwsCroniterExpressionDayOfMonthError),
         ("0 1-7/2,11-23/2, * * ? *", AwsCroniterExpressionHourError),
     ],
 )
@@ -366,6 +367,15 @@ def test_get_all_schedule_bw_dates_errors(from_date, to_date, expected_error):
                 None,
             ],
         ),
+        (
+            "30 9 L-30 2 ? *",
+            datetime.datetime(2025, 1, 21, tzinfo=datetime.timezone.utc),
+            2,
+            [
+                None,
+                None,
+            ],
+        ),
     ],
 )
 def test_get_next_parameterized(cron_expression, from_dt, n, expected_list):
@@ -435,6 +445,15 @@ def test_get_next_error():
                 None,
                 None,
                 None,
+                None,
+                None,
+            ],
+        ),
+        (
+            "30 9 L-30 2 ? *",
+            datetime.datetime(2025, 1, 21, tzinfo=datetime.timezone.utc),
+            2,
+            [
                 None,
                 None,
             ],

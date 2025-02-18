@@ -8,6 +8,7 @@ class RegexUtils:
     MINUTE_VALUES = r"(0?[0-9]|[1-5][0-9])"  # [0]0-59
     HOUR_VALUES = r"(0?[0-9]|1[0-9]|2[0-3])"  # [0]0-23
     MONTH_OF_DAY_VALUES = r"(0?[1-9]|[1-2][0-9]|3[0-1])"  # [0]1-31
+    MONTH_OF_DAY_VALUES_WITH_L = r"(0?[1-9]|[1-2][0-9]|30)"  # [0]1-30
     MONTH_VALUES = r"(?i:0?[1-9]|1[0-2]|JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)"  # [0]1-12 or JAN-DEC
     DAY_OF_WEEK_VALUES = r"(?i:[1-7]|SUN|MON|TUE|WED|THU|FRI|SAT)"  # 1-7 or SAT-SUN
     DAY_OF_WEEK_HASH = rf"({DAY_OF_WEEK_VALUES}#[1-5])"  # Day of the week in the Nth week of the month
@@ -50,7 +51,7 @@ class RegexUtils:
     @classmethod
     def day_of_month_regex(cls) -> str:
         return (
-            rf"^({cls.common_regex(cls.MONTH_OF_DAY_VALUES)}|\?|L|L-({cls.MONTH_OF_DAY_VALUES})|LW|{cls.MONTH_OF_DAY_VALUES}W)$"
+            rf"^({cls.common_regex(cls.MONTH_OF_DAY_VALUES)}|\?|L|L-({cls.MONTH_OF_DAY_VALUES_WITH_L})|LW|{cls.MONTH_OF_DAY_VALUES}W)$"
             # values , - * / ? L W
         )
 
