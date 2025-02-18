@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws-croniter"
-version = "1.0.1"
+version = "1.0.2"
 description = "A Python utility for AWS cron expressions. Validate and parse AWS EventBridge cron expressions seamlessly."
 authors = ["Siddarth Patil <siddarth3639@gmail.com>"]
 license = "MIT"

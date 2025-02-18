@@ -25,7 +25,11 @@ class Occurrence:
 
     def __find_once(self, parsed, datetime_from):
         if self.iter > 10:
-            raise Exception(f"AwsCroniterParser : this shouldn't happen, but iter {self.iter} > 10 ")
+            # This shouldn't happen, but iter > 10. This means that the method has been called recursively more than 10
+            # times and still not found any valid date.
+            # This is a safety check to prevent infinite loop. NONE is returned in this case. Example AWS cron
+            # expression when this can occur is "30 9 L-30 2 ? *"
+            return None
         self.iter += 1
         current_year = datetime_from.year
         current_month = datetime_from.month
@@ -87,7 +91,11 @@ class Occurrence:
 
     def __find_prev_once(self, parsed, datetime_from: datetime):
         if self.iter > 10:
-            raise Exception("AwsCroniterParser : this shouldn't happen, but iter > 10")
+            # This shouldn't happen, but iter > 10. This means that the method has been called recursively more than 10
+            # times and still not found any valid date.
+            # This is a safety check to prevent infinite loop. NONE is returned in this case. Example AWS cron
+            # expression when this can occur is "30 9 L-30 2 ? *"
+            return None
         self.iter += 1
         current_year = datetime_from.year
         current_month = datetime_from.month
@@ -127,7 +135,7 @@ class Occurrence:
                 p_days_of_month, lambda c: c <= (current_day_of_month if is_same_month else 31)
             )
 
-        if not day_of_month:
+        if not day_of_month or not self.__is_valid_date(year, month, day_of_month):
             dt = datetime.datetime(year, month, 1, tzinfo=datetime.timezone.utc) + relativedelta(seconds=-1)
             return self.__find_prev_once(parsed, dt)
 
