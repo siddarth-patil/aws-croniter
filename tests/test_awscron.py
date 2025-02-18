@@ -1,6 +1,4 @@
 import datetime
-from datetime import UTC
-from datetime import datetime as dt
 
 import pytest
 
@@ -371,7 +369,7 @@ def test_get_all_schedule_bw_dates_errors(from_date, to_date, expected_error):
         ),
         (
             "30 9 L-30 2 ? *",
-            dt.now(tz=UTC),
+            datetime.datetime(2025, 1, 21, tzinfo=datetime.timezone.utc),
             2,
             [
                 None,
@@ -453,7 +451,7 @@ def test_get_next_error():
         ),
         (
             "30 9 L-30 2 ? *",
-            dt.now(tz=UTC),
+            datetime.datetime(2025, 1, 21, tzinfo=datetime.timezone.utc),
             2,
             [
                 None,
