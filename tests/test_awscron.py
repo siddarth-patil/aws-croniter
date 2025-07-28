@@ -304,6 +304,11 @@ def test_get_all_schedule_bw_dates(from_dt, to_date, cron_expression, exclude_en
             "invalid_date",
             "Invalid from_date and to_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc",
         ),
+        (
+            datetime.datetime(2021, 8, 7, 8, 46, 57),  # No timezone
+            datetime.datetime(2021, 8, 7, 11, 30, 57, tzinfo=datetime.timezone.utc),
+            "Invalid from_date and to_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc",
+        ),
     ],
 )
 def test_get_all_schedule_bw_dates_errors(from_date, to_date, expected_error):
@@ -472,3 +477,151 @@ def test_get_prev_error():
     itr = AwsCroniter("0/5 8-17 ? * MON-FRI *")
     with pytest.raises(ValueError, match=expected_error):
         itr.get_prev("invalid_date")
+
+
+@pytest.mark.parametrize(
+    "cron_expression, from_date, to_date, expected_final_execution",
+    [
+        # Test case 1: Regular schedule with multiple executions
+        (
+            "0/30 * * * ? *",  # Every 30 minutes
+            datetime.datetime(2021, 8, 7, 8, 0, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2021, 8, 7, 11, 0, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 2: Specific date with single execution
+        (
+            "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
+            datetime.datetime(2023, 11, 14, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 31, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 3: End date matches the execution (inclusive=True behavior)
+        (
+            "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
+            datetime.datetime(2023, 11, 14, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 4: No executions in range
+        (
+            "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
+            datetime.datetime(2023, 12, 16, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 31, tzinfo=datetime.timezone.utc),
+            None,
+        ),
+        # Test case 5: Daily schedule
+        (
+            "0 9 * * ? *",  # Every day at 9:00 AM
+            datetime.datetime(2023, 12, 1, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 5, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 4, 9, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 6: Weekly schedule (Monday to Friday)
+        (
+            "0 8 ? * MON-FRI *",  # Every weekday at 8:00 AM
+            datetime.datetime(2023, 12, 4, tzinfo=datetime.timezone.utc),  # Monday
+            datetime.datetime(2023, 12, 8, tzinfo=datetime.timezone.utc),  # Friday
+            datetime.datetime(2023, 12, 7, 8, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 7: Monthly schedule with L (last day)
+        (
+            "0 12 L * ? *",  # Last day of every month at 12:00 PM
+            datetime.datetime(2023, 11, 1, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 31, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 11, 30, 12, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 8: Yearly schedule
+        (
+            "0 12 1 1 ? *",  # January 1st at 12:00 PM every year
+            datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2025, 12, 31, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2025, 1, 1, 12, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 9: Complex schedule with multiple executions
+        (
+            "0 10,14,18 * * ? *",  # Every day at 10:00 AM, 2:00 PM, and 6:00 PM
+            datetime.datetime(2023, 12, 1, 9, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 1, 19, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 1, 18, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 10: Start date matches execution
+        (
+            "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 31, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 11: Same start and end date that matches execution
+        (
+            "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+        ),
+        # Test case 12: Same start and end date that doesn't match execution
+        (
+            "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
+            datetime.datetime(2023, 12, 16, 12, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 16, 12, 0, tzinfo=datetime.timezone.utc),
+            None,
+        ),
+        # Test case 13: Very short range
+        (
+            "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
+            datetime.datetime(2023, 12, 15, 11, 59, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 1, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+        ),
+    ],
+    ids=[
+        "regular_schedule_multiple_executions",
+        "specific_date_single_execution",
+        "end_date_matches_execution",
+        "no_executions_in_range",
+        "daily_schedule",
+        "weekly_schedule_weekdays",
+        "monthly_schedule_last_day",
+        "yearly_schedule",
+        "complex_schedule_multiple_times",
+        "start_date_matches_execution",
+        "same_date_matches_execution",
+        "same_date_no_match",
+        "very_short_range",
+    ],
+)
+def test_get_final_execution_time(cron_expression, from_date, to_date, expected_final_execution):
+    """
+    Parameterized test for get_final_execution_time method.
+    Tests finding the final execution time between two dates for different AWS cron expressions.
+    """
+    itr = AwsCroniter(cron_expression)
+    result = itr.get_final_execution_time(from_date, to_date)
+    assert result == expected_final_execution
+
+
+@pytest.mark.parametrize(
+    "from_date, to_date, expected_error",
+    [
+        (
+            "invalid_date",
+            datetime.datetime(2021, 8, 7, 8, 46, 57, tzinfo=datetime.timezone.utc),
+            "The from_date and to_date must be same type. <class 'str'> != <class 'datetime.datetime'>",
+        ),
+        (
+            "invalid_date",
+            "invalid_date",
+            "Invalid from_date and to_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc",
+        ),
+        (
+            datetime.datetime(2021, 8, 7, 8, 46, 57),  # No timezone
+            datetime.datetime(2021, 8, 7, 11, 30, 57, tzinfo=datetime.timezone.utc),
+            "Invalid from_date and to_date. Must be of type datetime.datetime and have tzinfo = datetime.timezone.utc",
+        ),
+    ],
+)
+def test_get_final_execution_time_errors(from_date, to_date, expected_error):
+    """Test that get_final_execution_time raises ValueError for invalid from_date or to_date."""
+    itr = AwsCroniter("0/5 8-17 ? * MON-FRI *")
+    with pytest.raises(ValueError, match=expected_error):
+        itr.get_final_execution_time(from_date, to_date)

@@ -247,3 +247,44 @@ class AwsCroniter:
                 if schedule_list[-1] == to_date.replace(second=0, microsecond=0):
                     schedule_list.pop()
             return schedule_list
+
+    def get_final_execution_time(self, from_date, to_date):
+        """
+        Get the final execution datetime between from_date and to_date matching the given cron expression.
+        This method efficiently finds the final execution without looping through all occurrences.
+        It always uses inclusive=True, meaning if the to_date matches the cron expression,
+        it will be returned as the final execution time.
+
+        :param from_date: datetime object from where the schedule will start with tzinfo in utc.
+        :param to_date: datetime object to where the schedule will end with tzinfo in utc.
+        :return: datetime object representing the final execution time, or None if no executions found
+        """
+        if type(from_date) != type(to_date) and not (
+            isinstance(from_date, type(to_date)) or isinstance(to_date, type(from_date))
+        ):
+            raise ValueError(
+                "The from_date and to_date must be same type. {0} != {1}".format(type(from_date), type(to_date))
+            )
+
+        elif not isinstance(from_date, datetime.datetime) or (from_date.tzinfo != datetime.timezone.utc):
+            raise ValueError(
+                "Invalid from_date and to_date. Must be of type datetime.datetime "
+                "and have tzinfo = datetime.timezone.utc"
+            )
+        else:
+            # Use the occurrence logic to find the final execution efficiently
+            # Start from the end date and work backwards
+            occurrence = self.occurrence(to_date)
+            
+            # First, check if the to_date itself matches the cron expression
+            # We need to check if there's an execution at or before to_date
+            final_execution = occurrence.prev(inclusive=True)
+            
+            if final_execution is None or final_execution < from_date:
+                return None
+            
+            # If the final execution is before from_date, return None
+            if final_execution < from_date:
+                return None
+            
+            return final_execution

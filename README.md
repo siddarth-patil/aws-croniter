@@ -27,6 +27,7 @@ schedules programmatically.
     - [Fetch Next Occurrence](#fetching-the-next-occurrence)
     - [Fetch Previous Occurrence](#fetching-the-previous-occurrence)
     - [Fetch All Schedules in Range](#fetch-all-schedules-in-range)
+    - [Get Final Execution Time](#get-final-execution-time)
 5. [Contributing](#contributing)
 6. [License](#license)
 7. [Contact](#contact)
@@ -53,6 +54,7 @@ solution that also provides an improved and comprehensive tool for working with 
 - Compute:
     - Next and previous occurrence times for a given schedule.
     - All occurrences of a schedule between two given dates.
+    - Final execution time between two given dates (optimized for performance).
 - Handle special AWS cron syntax (e.g., `?`, `L`, `W`, `#`) and aliases for months (`JAN`, `FEB`, ...) and days of the
   week (`SUN`, `MON`, ...).
 
@@ -284,6 +286,33 @@ all_occurrences_exclude_ends = aws_cron.get_all_schedule_bw_dates(from_date, to_
 print(all_occurrences_exclude_ends)
 # Output: [datetime.datetime(2023, 11, 15, 12, 0, tzinfo=datetime.timezone.utc), 
 #          datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc)]
+```
+
+---
+
+### **Get Final Execution Time**
+
+The `get_final_execution_time` method retrieves the final execution datetime between two specified dates.
+
+#### **Basic Usage**
+
+```python
+from aws_croniter import AwsCroniter
+from datetime import datetime, timezone
+
+# AWS cron expression
+cron_expression = "0 12 15 * ? 2023"
+aws_cron = AwsCroniter(cron_expression)
+
+# Define the date range
+from_date = datetime(2023, 11, 14, tzinfo=timezone.utc)
+to_date = datetime(2023, 12, 31, tzinfo=timezone.utc)
+
+# Get the final execution time in the range
+final_execution = aws_cron.get_final_execution_time(from_date, to_date)
+
+print(final_execution)
+# Output: datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc)
 ```
 
 ---
