@@ -293,6 +293,8 @@ print(all_occurrences_exclude_ends)
 ### **Get Final Execution Time**
 
 The `get_final_execution_time` method retrieves the final execution datetime between two specified dates.
+The `to_date` is exclusive, meaning if it exactly matches the cron expression, it will not be included
+in the result. Only executions strictly before `to_date` will be returned.
 
 #### **Basic Usage**
 

@@ -252,11 +252,11 @@ class AwsCroniter:
         """
         Get the final execution datetime between from_date and to_date matching the given cron expression.
         This method efficiently finds the final execution without looping through all occurrences.
-        It always uses inclusive=True, meaning if the to_date matches the cron expression,
-        it will be returned as the final execution time.
+        The to_date is exclusive, meaning if to_date exactly matches the cron expression,
+        it will not be included in the result. Only executions strictly before to_date will be returned.
 
         :param from_date: datetime object from where the schedule will start with tzinfo in utc.
-        :param to_date: datetime object to where the schedule will end with tzinfo in utc.
+        :param to_date: datetime object to where the schedule will end with tzinfo in utc (exclusive).
         :return: datetime object representing the final execution time, or None if no executions found
         """
         if type(from_date) != type(to_date) and not (
@@ -274,17 +274,15 @@ class AwsCroniter:
         else:
             # Use the occurrence logic to find the final execution efficiently
             # Start from the end date and work backwards
+            # Using inclusive=False to make to_date exclusive - if to_date matches an execution,
+            # it will not be included, and we'll get the previous execution instead
             occurrence = self.occurrence(to_date)
             
-            # First, check if the to_date itself matches the cron expression
-            # We need to check if there's an execution at or before to_date
-            final_execution = occurrence.prev(inclusive=True)
+            # Find the previous execution before to_date (to_date is exclusive)
+            final_execution = occurrence.prev(inclusive=False)
             
+            # If no execution found, or the execution is before from_date, return None
             if final_execution is None or final_execution < from_date:
-                return None
-            
-            # If the final execution is before from_date, return None
-            if final_execution < from_date:
                 return None
             
             return final_execution

@@ -487,7 +487,7 @@ def test_get_prev_error():
             "0/30 * * * ? *",  # Every 30 minutes
             datetime.datetime(2021, 8, 7, 8, 0, 0, tzinfo=datetime.timezone.utc),
             datetime.datetime(2021, 8, 7, 11, 0, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2021, 8, 7, 11, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2021, 8, 7, 10, 30, tzinfo=datetime.timezone.utc),
         ),
         # Test case 2: Specific date with single execution
         (
@@ -496,12 +496,12 @@ def test_get_prev_error():
             datetime.datetime(2023, 12, 31, tzinfo=datetime.timezone.utc),
             datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
         ),
-        # Test case 3: End date matches the execution (inclusive=True behavior)
+        # Test case 3: End date matches the execution (to_date is exclusive)
         (
             "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
             datetime.datetime(2023, 11, 14, tzinfo=datetime.timezone.utc),
             datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 11, 15, 12, 0, tzinfo=datetime.timezone.utc),
         ),
         # Test case 4: No executions in range
         (
@@ -552,12 +552,12 @@ def test_get_prev_error():
             datetime.datetime(2023, 12, 31, tzinfo=datetime.timezone.utc),
             datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
         ),
-        # Test case 11: Same start and end date that matches execution
+        # Test case 11: Same start and end date that matches execution (to_date is exclusive)
         (
             "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
             datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
             datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc),
+            None,
         ),
         # Test case 12: Same start and end date that doesn't match execution
         (
@@ -566,7 +566,7 @@ def test_get_prev_error():
             datetime.datetime(2023, 12, 16, 12, 0, tzinfo=datetime.timezone.utc),
             None,
         ),
-        # Test case 13: Very short range
+        # Test case 13: Very short range (to_date is after execution, so execution is included)
         (
             "0 12 15 * ? 2023",  # 15th of every month at 12:00 PM in 2023
             datetime.datetime(2023, 12, 15, 11, 59, tzinfo=datetime.timezone.utc),
