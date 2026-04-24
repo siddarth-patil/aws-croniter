@@ -5,11 +5,19 @@ description = "A Python utility for AWS cron expressions. Validate and parse AWS
 authors = ["Siddarth Patil <siddarth3639@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 
 packages = [{ include = "aws_croniter", from = "src" }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 python-dateutil = "^2.8.1"
 
 [tool.poetry.group.test.dependencies]
