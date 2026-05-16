@@ -1,5 +1,4 @@
 import datetime
-import re
 
 from aws_croniter.exceptions import AwsCroniterExpressionDayOfMonthError
 from aws_croniter.exceptions import AwsCroniterExpressionDayOfWeekError
@@ -64,13 +63,13 @@ class AwsCroniter:
         | Day-of-week  | 1-7 or SUN-SAT  | , - * ? L #   |
         | Year         | 1970-2199       | , - * /       |
         """
-        value_count = len(self.cron.split(" "))
+        value_count = len(self.rules)
         if value_count != 6:
             raise AwsCroniterExpressionError(
                 f"Incorrect number of values in '{self.cron}'. 6 required, {value_count} provided."
             )
 
-        minute, hour, day_of_month, month, day_of_week, year = self.cron.split(" ")
+        minute, hour, day_of_month, month, day_of_week, year = self.rules
 
         if not ((day_of_month == "?" and day_of_week != "?") or (day_of_month != "?" and day_of_week == "?")):
             raise AwsCroniterExpressionError(
@@ -78,17 +77,17 @@ class AwsCroniter:
                 "One must be a question mark (?)"
             )
 
-        if not re.fullmatch(RegexUtils.minute_regex(), minute):
+        if not RegexUtils.fullmatch_field("minute", RegexUtils.minute_regex, minute):
             raise AwsCroniterExpressionMinuteError(f"Invalid minute value '{minute}'.")
-        if not re.fullmatch(RegexUtils.hour_regex(), hour):
+        if not RegexUtils.fullmatch_field("hour", RegexUtils.hour_regex, hour):
             raise AwsCroniterExpressionHourError(f"Invalid hour value '{hour}'.")
-        if not re.fullmatch(RegexUtils.day_of_month_regex(), day_of_month):
+        if not RegexUtils.fullmatch_field("day_of_month", RegexUtils.day_of_month_regex, day_of_month):
             raise AwsCroniterExpressionDayOfMonthError(f"Invalid day-of-month value '{day_of_month}'.")
-        if not re.fullmatch(RegexUtils.month_regex(), month):
+        if not RegexUtils.fullmatch_field("month", RegexUtils.month_regex, month):
             raise AwsCroniterExpressionMonthError(f"Invalid month value '{month}'.")
-        if not re.fullmatch(RegexUtils.day_of_week_regex(), day_of_week):
+        if not RegexUtils.fullmatch_field("day_of_week", RegexUtils.day_of_week_regex, day_of_week):
             raise AwsCroniterExpressionDayOfWeekError(f"Invalid day-of-week value '{day_of_week}'.")
-        if not re.fullmatch(RegexUtils.year_regex(), year):
+        if not RegexUtils.fullmatch_field("year", RegexUtils.year_regex, year):
             raise AwsCroniterExpressionYearError(f"Invalid year value '{year}'.")
 
         # If validation passes, then parse the cron expression
@@ -126,7 +125,8 @@ class AwsCroniter:
         if rule.endswith("W"):
             return ["W", int(rule[0:-1])]
         if "#" in rule:
-            return ["#", int(rule.split("#")[0]), int(rule.split("#")[1])]
+            day_of_week, week_of_month = rule.split("#", 1)
+            return ["#", int(day_of_week), int(week_of_month)]
 
         allows = []
         for subrule in rule.split(","):
@@ -277,12 +277,12 @@ class AwsCroniter:
             # Using inclusive=False to make to_date exclusive - if to_date matches an execution,
             # it will not be included, and we'll get the previous execution instead
             occurrence = self.occurrence(to_date)
-            
+
             # Find the previous execution before to_date (to_date is exclusive)
             final_execution = occurrence.prev(inclusive=False)
-            
+
             # If no execution found, or the execution is before from_date, return None
             if final_execution is None or final_execution < from_date:
                 return None
-            
+
             return final_execution

@@ -37,17 +37,15 @@ class Occurrence:
         current_hour = datetime_from.hour
         current_minute = datetime_from.minute
 
-        year = SequenceUtils.array_find_first(parsed.years, lambda c: c >= current_year)
+        year = SequenceUtils.find_first_gte(parsed.years, current_year)
         if year is None:
             return None
 
-        month = SequenceUtils.array_find_first(
-            parsed.months, lambda c: c >= (current_month if year == current_year else 1)
-        )
+        month = SequenceUtils.find_first_gte(parsed.months, current_month if year == current_year else 1)
         if not month:
             return self.__find_once(parsed, datetime.datetime(year + 1, 1, 1, tzinfo=datetime.timezone.utc))
 
-        is_same_month = True if year == current_year and month == current_month else False
+        is_same_month = year == current_year and month == current_month
         p_days_of_month = parsed.days_of_month
         is_w_in_current_month = None
 
@@ -64,22 +62,20 @@ class Occurrence:
         if is_w_in_current_month is not None and not is_w_in_current_month:
             day_of_month = False
         else:
-            day_of_month = SequenceUtils.array_find_first(
-                p_days_of_month, lambda c: c >= (current_day_of_month if is_same_month else 1)
-            )
+            day_of_month = SequenceUtils.find_first_gte(p_days_of_month, current_day_of_month if is_same_month else 1)
         if not day_of_month or not self.__is_valid_date(year, month, day_of_month):
             dt = datetime.datetime(year, month, 1, tzinfo=datetime.timezone.utc) + relativedelta(months=+1)
             return self.__find_once(parsed, dt)
 
         is_same_date = is_same_month and day_of_month == current_day_of_month
 
-        hour = SequenceUtils.array_find_first(parsed.hours, lambda c: c >= (current_hour if is_same_date else 0))
+        hour = SequenceUtils.find_first_gte(parsed.hours, current_hour if is_same_date else 0)
         if hour is None:
             dt = datetime.datetime(year, month, day_of_month, tzinfo=datetime.timezone.utc) + relativedelta(days=+1)
             return self.__find_once(parsed, dt)
 
-        minute = SequenceUtils.array_find_first(
-            parsed.minutes, lambda c: c >= (current_minute if is_same_date and hour == current_hour else 0)
+        minute = SequenceUtils.find_first_gte(
+            parsed.minutes, current_minute if is_same_date and hour == current_hour else 0
         )
         if minute is None:
             dt = datetime.datetime(year, month, day_of_month, hour, tzinfo=datetime.timezone.utc) + relativedelta(
@@ -103,18 +99,16 @@ class Occurrence:
         current_hour = datetime_from.hour
         current_minute = datetime_from.minute
 
-        year = SequenceUtils.array_find_last(parsed.years, lambda c: c <= current_year)
+        year = SequenceUtils.find_last_lte(parsed.years, current_year)
         if year is None:
             return None
 
-        month = SequenceUtils.array_find_last(
-            parsed.months, lambda c: c <= (current_month if year == current_year else 12)
-        )
+        month = SequenceUtils.find_last_lte(parsed.months, current_month if year == current_year else 12)
         if not month:
             dt = datetime.datetime(year, 1, 1, tzinfo=datetime.timezone.utc) + relativedelta(seconds=-1)
             return self.__find_prev_once(parsed, dt)
 
-        is_same_month = True if year == current_year and month == current_month else False
+        is_same_month = year == current_year and month == current_month
         p_days_of_month = parsed.days_of_month
         is_w_in_current_month = None
 
@@ -131,9 +125,7 @@ class Occurrence:
         if is_w_in_current_month is not None and not is_w_in_current_month:
             day_of_month = False
         else:
-            day_of_month = SequenceUtils.array_find_last(
-                p_days_of_month, lambda c: c <= (current_day_of_month if is_same_month else 31)
-            )
+            day_of_month = SequenceUtils.find_last_lte(p_days_of_month, current_day_of_month if is_same_month else 31)
 
         if not day_of_month or not self.__is_valid_date(year, month, day_of_month):
             dt = datetime.datetime(year, month, 1, tzinfo=datetime.timezone.utc) + relativedelta(seconds=-1)
@@ -141,13 +133,13 @@ class Occurrence:
 
         is_same_date = is_same_month and day_of_month == current_day_of_month
 
-        hour = SequenceUtils.array_find_last(parsed.hours, lambda c: c <= (current_hour if is_same_date else 23))
+        hour = SequenceUtils.find_last_lte(parsed.hours, current_hour if is_same_date else 23)
         if hour is None:
             dt = datetime.datetime(year, month, day_of_month, tzinfo=datetime.timezone.utc) + relativedelta(seconds=-1)
             return self.__find_prev_once(parsed, dt)
 
-        minute = SequenceUtils.array_find_last(
-            parsed.minutes, lambda c: c <= (current_minute if is_same_date and hour == current_hour else 59)
+        minute = SequenceUtils.find_last_lte(
+            parsed.minutes, current_minute if is_same_date and hour == current_hour else 59
         )
         if minute is None:
             dt = datetime.datetime(year, month, day_of_month, hour, tzinfo=datetime.timezone.utc) + relativedelta(

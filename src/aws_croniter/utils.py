@@ -1,10 +1,15 @@
+import bisect
 import calendar
 import datetime
+import re
+from typing import Callable
 
 from dateutil.relativedelta import relativedelta
 
 
 class RegexUtils:
+    _compiled_patterns: dict[str, re.Pattern[str]] = {}
+
     MINUTE_VALUES = r"(0?[0-9]|[1-5][0-9])"  # [0]0-59
     HOUR_VALUES = r"(0?[0-9]|1[0-9]|2[0-3])"  # [0]0-23
     MONTH_OF_DAY_VALUES = r"(0?[1-9]|[1-2][0-9]|3[0-1])"  # [0]1-31
@@ -69,6 +74,18 @@ class RegexUtils:
     def year_regex(cls):
         return rf"^({cls.common_regex(cls.YEAR_VALUES)})$"  # values , - * /
 
+    @classmethod
+    def _compiled_pattern(cls, name: str, pattern_builder: Callable[[], str]) -> re.Pattern[str]:
+        pattern = cls._compiled_patterns.get(name)
+        if pattern is None:
+            pattern = re.compile(pattern_builder())
+            cls._compiled_patterns[name] = pattern
+        return pattern
+
+    @classmethod
+    def fullmatch_field(cls, name: str, pattern_builder: Callable[[], str], value: str) -> bool:
+        return cls._compiled_pattern(name, pattern_builder).fullmatch(value) is not None
+
 
 class DateUtils:
     @staticmethod
@@ -80,24 +97,37 @@ class DateUtils:
     @staticmethod
     def get_days_of_month_from_days_of_week(year, month, days_of_week):
         """Get all days of the month that match the given days of the week."""
-        days_of_month = []
-        index = 0  # only for "#" use case
         no_of_days_in_month = calendar.monthrange(year, month)[1]
-        for i in range(1, no_of_days_in_month + 1, 1):
-            this_date = datetime.datetime(year, month, i, tzinfo=datetime.timezone.utc)
-            if days_of_week[0] == "L":
-                if days_of_week[1] == DateUtils.python_to_aws_day_of_week(this_date.weekday()):
+
+        if days_of_week[0] == "L":
+            target_dow = days_of_week[1]
+            for i in range(1, no_of_days_in_month + 1):
+                this_date = datetime.datetime(year, month, i, tzinfo=datetime.timezone.utc)
+                if target_dow == DateUtils.python_to_aws_day_of_week(this_date.weekday()):
                     same_day_next_week = datetime.datetime.fromtimestamp(
                         int(this_date.timestamp()) + 7 * 24 * 3600, tz=datetime.timezone.utc
                     )
                     if same_day_next_week.month != this_date.month:
                         return [i]
-            elif days_of_week[0] == "#":
-                if days_of_week[1] == DateUtils.python_to_aws_day_of_week(this_date.weekday()):
+            return []
+
+        if days_of_week[0] == "#":
+            target_dow = days_of_week[1]
+            target_week = days_of_week[2]
+            index = 0
+            for i in range(1, no_of_days_in_month + 1):
+                this_date = datetime.datetime(year, month, i, tzinfo=datetime.timezone.utc)
+                if target_dow == DateUtils.python_to_aws_day_of_week(this_date.weekday()):
                     index += 1
-                if days_of_week[2] == index:
-                    return [i]
-            elif DateUtils.python_to_aws_day_of_week(this_date.weekday()) in days_of_week:
+                    if target_week == index:
+                        return [i]
+            return []
+
+        days_of_month = []
+        allowed_days = frozenset(days_of_week)
+        for i in range(1, no_of_days_in_month + 1):
+            this_date = datetime.datetime(year, month, i, tzinfo=datetime.timezone.utc)
+            if DateUtils.python_to_aws_day_of_week(this_date.weekday()) in allowed_days:
                 days_of_month.append(i)
         return days_of_month
 
@@ -149,6 +179,22 @@ class TimeUtils:
 
 
 class SequenceUtils:
+    @staticmethod
+    def find_first_gte(sequence, value):
+        """Return the first element in a sorted sequence that is >= value."""
+        index = bisect.bisect_left(sequence, value)
+        if index < len(sequence):
+            return sequence[index]
+        return None
+
+    @staticmethod
+    def find_last_lte(sequence, value):
+        """Return the last element in a sorted sequence that is <= value."""
+        index = bisect.bisect_right(sequence, value) - 1
+        if index >= 0:
+            return sequence[index]
+        return None
+
     @staticmethod
     def array_find_first(sequence, function):
         """Find the first element in a sequence that satisfies the given function."""
