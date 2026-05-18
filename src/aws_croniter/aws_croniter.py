@@ -216,7 +216,7 @@ class AwsCroniter:
         :return: list of datetime objects
         """
 
-        if type(from_date) != type(to_date) and not (
+        if type(from_date) is not type(to_date) and not (
             isinstance(from_date, type(to_date)) or isinstance(to_date, type(from_date))
         ):
             raise ValueError(
@@ -259,7 +259,7 @@ class AwsCroniter:
         :param to_date: datetime object to where the schedule will end with tzinfo in utc (exclusive).
         :return: datetime object representing the final execution time, or None if no executions found
         """
-        if type(from_date) != type(to_date) and not (
+        if type(from_date) is not type(to_date) and not (
             isinstance(from_date, type(to_date)) or isinstance(to_date, type(from_date))
         ):
             raise ValueError(

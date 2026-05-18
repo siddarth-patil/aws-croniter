@@ -38,3 +38,9 @@ class AwsCroniterExpressionDayOfWeekError(AwsCroniterExpressionError):
     """Exception raised for invalid day-of-week values in an AWS cron expression."""
 
     pass
+
+
+class AwsCroniterConflictSearchLimitError(AwsCroniterExpressionError):
+    """Raised when conflict detection exceeds configured safety limits."""
+
+    pass
