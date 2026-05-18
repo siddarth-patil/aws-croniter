@@ -28,6 +28,7 @@ schedules programmatically.
     - [Fetch Previous Occurrence](#fetching-the-previous-occurrence)
     - [Fetch All Schedules in Range](#fetch-all-schedules-in-range)
     - [Get Final Execution Time](#get-final-execution-time)
+    - [Detect Schedule Conflicts](#detect-schedule-conflicts)
 5. [Contributing](#contributing)
 6. [License](#license)
 7. [Contact](#contact)
@@ -55,6 +56,7 @@ solution that also provides an improved and comprehensive tool for working with 
     - Next and previous occurrence times for a given schedule.
     - All occurrences of a schedule between two given dates.
     - Final execution time between two given dates (optimized for performance).
+    - Conflicts between two or more schedules inside a bounded UTC time window.
 - Handle special AWS cron syntax (e.g., `?`, `L`, `W`, `#`) and aliases for months (`JAN`, `FEB`, ...) and days of the
   week (`SUN`, `MON`, ...).
 
@@ -316,6 +318,145 @@ final_execution = aws_cron.get_final_execution_time(from_date, to_date)
 print(final_execution)
 # Output: datetime.datetime(2023, 12, 15, 12, 0, tzinfo=datetime.timezone.utc)
 ```
+
+---
+
+### **Detect Schedule Conflicts**
+
+Use `find_conflicts` with a list of **two or more** schedules. Each item may be a cron string or
+an `AwsCroniter` instance (already parsed). Passing only one expression raises `ValueError`.
+
+All datetimes must use `datetime.timezone.utc` (the package is not timezone-aware yet).
+
+**What counts as a conflict**
+
+Runs from **different** expressions that are closer than the minimum separation (`buffer`):
+
+| `buffer` | Meaning |
+|----------|---------|
+| `timedelta(0)` | Exact same run time only |
+| `timedelta(minutes=15)` | Runs within 15 minutes of each other |
+| `timedelta(hours=1)` | Runs within one hour of each other |
+
+`buffer` is a standard `timedelta` - seconds, minutes, hours, or combined units all work.
+Schedules are evaluated at **minute** precision (AWS cron has no seconds field).
+
+**Collection modes**
+
+| Mode | Behavior |
+|------|----------|
+| `ConflictCollectionMode.FIRST` (default) | Stop after the earliest conflict in the window |
+| `ConflictCollectionMode.ALL` | Collect up to `max_conflicts` conflicts, in time order |
+
+The search window `[from_date, to_date]` is inclusive. Work scales with occurrences examined in
+the window, not with the cartesian product of all schedule pairs.
+
+**Safety limits** (defaults shown) raise `AwsCroniterConflictSearchLimitError` when exceeded:
+
+| Option | Default | Purpose |
+|--------|---------|---------|
+| `max_expressions` | `50` | Maximum schedules in one call |
+| `max_occurrences_per_expression` | `10_000` | Maximum runs generated per schedule |
+| `max_total_occurrences` | `100_000` | Maximum runs generated across all schedules |
+
+#### **First conflict with cron strings (default mode)**
+
+Pass raw cron strings and use the default collection mode to answer “do these two schedules
+clash, and when is the first clash?”
+
+```python
+from datetime import datetime, timedelta, timezone
+
+from aws_croniter import find_conflicts
+
+from_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
+to_date = datetime(2024, 1, 31, 23, 59, tzinfo=timezone.utc)
+
+result = find_conflicts(
+    [
+        "0 12 15 * ? 2024",   # 12:00 on the 15th
+        "5 12 15 * ? 2024",   # 12:05 on the 15th
+    ],
+    from_date=from_date,
+    to_date=to_date,
+    buffer=timedelta(minutes=10),
+    # collection_mode defaults to ConflictCollectionMode.FIRST
+)
+
+if result.has_conflict:
+    conflict = result.first_conflict
+    print(conflict.separation)  # 0:05:00
+    for run in conflict.runs:
+        print(run.expression_index, run.expression, run.run_at)
+# Output (example):
+# 0:05:00
+# 0 0 12 15 * ? 2024 2024-01-15 12:00:00+00:00
+# 1 5 12 15 * ? 2024 2024-01-15 12:05:00+00:00
+```
+
+#### **Multiple conflicts with `AwsCroniter` objects (`ALL` mode)**
+
+Reuse parsed `AwsCroniter` instances (for example after validation elsewhere) and collect
+several conflicts across three or more schedules.
+
+```python
+from datetime import datetime, timedelta, timezone
+
+from aws_croniter import AwsCroniter, ConflictCollectionMode, find_conflicts
+
+from_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
+to_date = datetime(2024, 1, 3, tzinfo=timezone.utc)
+
+schedules = [
+    AwsCroniter("*/15 * * * ? 2024"),  # every 15 minutes
+    AwsCroniter("*/10 * * * ? 2024"),  # every 10 minutes
+    AwsCroniter("0 12 15 * ? 2024"),   # once daily at noon on the 15th
+]
+
+result = find_conflicts(
+    schedules,
+    from_date=from_date,
+    to_date=to_date,
+    buffer=timedelta(0),  # exact timestamp collisions only
+    collection_mode=ConflictCollectionMode.ALL,
+    max_conflicts=3,
+)
+
+print(result.has_conflict, len(result.conflicts), result.occurrences_examined)
+for i, conflict in enumerate(result.conflicts, start=1):
+    print(f"Conflict {i} at {conflict.earliest}, separation={conflict.separation}")
+# Output (example):
+# True 3 13
+# Conflict 1 at 2024-01-01 00:00:00+00:00, separation=0:00:00
+# Conflict 2 at 2024-01-01 00:30:00+00:00, separation=0:00:00
+# Conflict 3 at 2024-01-01 01:00:00+00:00, separation=0:00:00
+```
+
+`*/15` and `*/10` align every 30 minutes (`00:00`, `00:30`, `01:00`, …), so `buffer=0` reports
+those exact collisions. Search stops after three conflicts, so `occurrences_examined` stays
+small even for dense schedules.
+
+#### **Reusable settings with `ConflictSearchOptions`**
+
+Pass keyword arguments directly, or bundle them once and reuse via `options`:
+
+```python
+from datetime import datetime, timezone
+
+from aws_croniter import ConflictSearchOptions, find_conflicts
+
+options = ConflictSearchOptions.from_call(
+    from_date=datetime(2024, 1, 1, tzinfo=timezone.utc),
+    to_date=datetime(2024, 1, 31, tzinfo=timezone.utc),
+)
+
+result = find_conflicts(
+    ["0 12 15 * ? 2024", "0 13 15 * ? 2024"],
+    options=options,
+)
+```
+
+When `options` is provided, other keyword arguments to `find_conflicts` are ignored.
 
 ---
 
