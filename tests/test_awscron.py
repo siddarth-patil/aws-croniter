@@ -125,6 +125,50 @@ from aws_croniter.exceptions import AwsCroniterExpressionYearError
                 "years": [x for x in range(1970, 2199 + 1)],
             },
         ),
+        (
+            "0 8 ? * FRI-MON *",
+            {
+                "minutes": [0],
+                "hours": [8],
+                "daysOfMonth": [],
+                "months": list(range(1, 13)),
+                "daysOfWeek": [1, 2, 6, 7],
+                "years": [x for x in range(1970, 2199 + 1)],
+            },
+        ),
+        (
+            "0 8 ? * SAT-SUN *",
+            {
+                "minutes": [0],
+                "hours": [8],
+                "daysOfMonth": [],
+                "months": list(range(1, 13)),
+                "daysOfWeek": [1, 7],
+                "years": [x for x in range(1970, 2199 + 1)],
+            },
+        ),
+        (
+            "0 0 1 NOV-FEB ? *",
+            {
+                "minutes": [0],
+                "hours": [0],
+                "daysOfMonth": [1],
+                "months": [1, 2, 11, 12],
+                "daysOfWeek": [],
+                "years": [x for x in range(1970, 2199 + 1)],
+            },
+        ),
+        (
+            "0 22-2 ? * MON *",
+            {
+                "minutes": [0],
+                "hours": [0, 1, 2, 22, 23],
+                "daysOfMonth": [],
+                "months": list(range(1, 13)),
+                "daysOfWeek": [2],
+                "years": [x for x in range(1970, 2199 + 1)],
+            },
+        ),
     ],
     ids=[
         "Every-3-hours-multiple-days-2020-2030",
@@ -137,6 +181,10 @@ from aws_croniter.exceptions import AwsCroniterExpressionYearError
         "Second-last-day-of-month",
         "Last-day-minus-21-day-of-month",
         "Closest-weekday-to-3rd",
+        "Day-of-week-wrap-Fri-to-Mon",
+        "Day-of-week-wrap-Sat-to-Sun",
+        "Month-wrap-Nov-to-Feb",
+        "Hour-wrap-22-to-2",
     ],
 )
 def test_cron_expressions(cron_str, expected):
@@ -381,6 +429,40 @@ def test_get_all_schedule_bw_dates_errors(from_date, to_date, expected_error):
                 None,
             ],
         ),
+        (
+            "0 8 ? * FRI-MON *",
+            datetime.datetime(2026, 6, 5, 12, 0, tzinfo=datetime.timezone.utc),
+            4,
+            [
+                datetime.datetime(2026, 6, 6, 8, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 7, 8, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 8, 8, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 12, 8, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            "0 0 1 NOV-FEB ? *",
+            datetime.datetime(2026, 6, 5, 0, 0, tzinfo=datetime.timezone.utc),
+            4,
+            [
+                datetime.datetime(2026, 11, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 12, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2027, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2027, 2, 1, 0, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            "0 22-2 ? * MON *",
+            datetime.datetime(2026, 6, 8, 12, 0, tzinfo=datetime.timezone.utc),
+            5,
+            [
+                datetime.datetime(2026, 6, 8, 22, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 8, 23, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 15, 0, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 15, 1, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 15, 2, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
     ],
 )
 def test_get_next_parameterized(cron_expression, from_dt, n, expected_list):
@@ -461,6 +543,38 @@ def test_get_next_error():
             [
                 None,
                 None,
+            ],
+        ),
+        (
+            "0 8 ? * FRI-MON *",
+            datetime.datetime(2026, 6, 9, 12, 0, tzinfo=datetime.timezone.utc),
+            2,
+            [
+                datetime.datetime(2026, 6, 8, 8, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 7, 8, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            "0 0 1 NOV-FEB ? *",
+            datetime.datetime(2027, 3, 1, 0, 0, tzinfo=datetime.timezone.utc),
+            4,
+            [
+                datetime.datetime(2027, 2, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2027, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 12, 1, 0, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 11, 1, 0, 0, tzinfo=datetime.timezone.utc),
+            ],
+        ),
+        (
+            "0 22-2 ? * MON *",
+            datetime.datetime(2026, 6, 9, 12, 0, tzinfo=datetime.timezone.utc),
+            5,
+            [
+                datetime.datetime(2026, 6, 8, 23, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 8, 22, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 8, 2, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 8, 1, 0, tzinfo=datetime.timezone.utc),
+                datetime.datetime(2026, 6, 8, 0, 0, tzinfo=datetime.timezone.utc),
             ],
         ),
     ],
