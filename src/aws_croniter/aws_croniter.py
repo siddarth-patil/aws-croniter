@@ -145,10 +145,12 @@ class AwsCroniter:
                     start = int(parts[0])
                     end = max_value
                 increment = int(parts[1])
-                allows.extend(range(start, end + 1, increment))
+                allows.extend(
+                    AwsCroniter.__wrapping_range(start, end, min_value=min_value, max_value=max_value, step=increment)
+                )
             elif "-" in subrule:
                 start, end = map(int, subrule.split("-"))
-                allows.extend(range(start, end + 1))
+                allows.extend(AwsCroniter.__wrapping_range(start, end, min_value=min_value, max_value=max_value))
             elif subrule == "*":
                 allows.extend(range(min_value, max_value + 1))
             else:
@@ -156,6 +158,48 @@ class AwsCroniter:
 
         allows.sort()
         return allows
+
+    @staticmethod
+    def __wrapping_range(start, end, *, min_value, max_value, step=1):
+        """
+        Inclusive wrapping range over a bounded integer domain.
+
+        Examples:
+            list(_wrapping_range(55, 10, min_value=0, max_value=59, step=15))
+            -> [55, 10]
+
+            list(_wrapping_range(0, 59, min_value=0, max_value=59, step=15))
+            -> [0, 15, 30, 45]
+
+            list(_wrapping_range(7, 1, min_value=1, max_value=7))
+            -> [7, 1]
+        """
+        if step <= 0:
+            raise ValueError("step must be positive")
+
+        if min_value > max_value:
+            raise ValueError("min_value must be <= max_value")
+
+        if not (min_value <= start <= max_value):
+            raise ValueError("start is outside the valid domain")
+
+        if not (min_value <= end <= max_value):
+            raise ValueError("end is outside the valid domain")
+
+        size = max_value - min_value + 1
+
+        # Convert to zero-based offsets internally.
+        start_offset = start - min_value
+        end_offset = end - min_value
+
+        if start_offset <= end_offset:
+            distance = end_offset - start_offset
+        else:
+            distance = size - start_offset + end_offset
+
+        # Inclusive range, but only values reached by `step`.
+        for offset in range(0, distance + 1, step):
+            yield min_value + ((start_offset + offset) % size)
 
     def get_next(self, from_date, n=1, inclusive=False):
         """
